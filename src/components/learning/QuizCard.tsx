@@ -29,18 +29,6 @@ export default function QuizCard({ questions, onComplete }: QuizCardProps) {
   const handleSelect = (questionId: string, value: string) => {
     if (allCorrect) return;
     setAnswers(prev => ({ ...prev, [questionId]: value }));
-    if (submitted) {
-      setWrongIds(prev => {
-        const next = new Set(prev);
-        const question = questions.find(q => q.id === questionId);
-        if (question && value === question.correctAnswer) {
-          next.delete(questionId);
-        } else if (question) {
-          next.add(questionId);
-        }
-        return next;
-      });
-    }
   };
 
   const handleSubmit = useCallback(() => {
@@ -136,15 +124,15 @@ export default function QuizCard({ questions, onComplete }: QuizCardProps) {
         const isCorrect = submitted && !isWrong && selected === q.correctAnswer;
         const showResult = submitted;
 
-        let optionStates: Record<string, 'correct' | 'wrong' | 'selected' | null> = {};
+        let optionStates: Record<string, 'correct' | 'wrong' | 'selected' | 'recheck' | null> = {};
         if (q.options) {
           q.options.forEach(opt => {
             const val = t(opt);
             if (showResult && val === q.correctAnswer) {
               optionStates[val] = 'correct';
-            } else if (showResult && isWrong && val === selected && val !== q.correctAnswer) {
-              optionStates[val] = 'wrong';
-            } else if (selected === val && !showResult) {
+            } else if (showResult && isWrong && val === selected) {
+              optionStates[val] = 'recheck';
+            } else if (selected === val) {
               optionStates[val] = 'selected';
             }
           });
@@ -169,6 +157,7 @@ export default function QuizCard({ questions, onComplete }: QuizCardProps) {
                 let cls = 'flex items-center gap-3 rounded-lg border px-4 py-3 text-[0.9375rem] transition-all';
                 if (state === 'correct') cls += ' border-emerald-500 bg-emerald-50 dark:border-emerald-400 dark:bg-emerald-900/30';
                 else if (state === 'wrong') cls += ' border-red-500 bg-red-50 dark:border-red-400 dark:bg-red-900/30';
+                else if (state === 'recheck') cls += ' border-amber-400 bg-amber-50 dark:border-amber-400 dark:bg-amber-900/30';
                 else if (state === 'selected') cls += ' border-blue-500 bg-blue-50 dark:border-sky-400 dark:bg-sky-900/30';
                 else if (showResult && !isWrong) cls += ' cursor-default border-gray-200 opacity-80 dark:border-gray-600';
                 else cls += ' cursor-pointer border-gray-200 hover:border-blue-500 hover:bg-blue-50/50 dark:border-gray-600 dark:hover:border-sky-400 dark:hover:bg-sky-900/20';
@@ -178,9 +167,10 @@ export default function QuizCard({ questions, onComplete }: QuizCardProps) {
                     if (!showResult || isWrong) handleSelect(q.id, val);
                   }}>
                     <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border-2 transition-all" style={{
-                      borderColor: state === 'correct' ? 'var(--success)' : state === 'wrong' ? 'var(--danger)' : state === 'selected' ? 'var(--primary)' : 'var(--border)',
+                      borderColor: state === 'correct' ? 'var(--success)' : state === 'wrong' ? 'var(--danger)' : state === 'recheck' ? 'var(--warning)' : state === 'selected' ? 'var(--primary)' : 'var(--border)',
                     }}>
                       {state === 'selected' && <span className="h-2 w-2 rounded-full bg-blue-600 dark:bg-sky-400" />}
+                      {state === 'recheck' && <span className="h-2 w-2 rounded-full bg-amber-500 dark:bg-amber-400" />}
                       {state === 'correct' && <span className="text-xs text-emerald-600 dark:text-emerald-400">✓</span>}
                       {state === 'wrong' && <span className="text-xs text-red-500 dark:text-red-400">✗</span>}
                     </span>
