@@ -52,10 +52,9 @@ export default function LessonSidebar({ units, currentLessonId, isOpen, onClose 
     <>
       {isOpen && <div className="fixed inset-0 z-30 bg-black/30 md:hidden" onClick={onClose} />}
       <aside className={`
-        ${isOpen ? 'max-md:block' : 'max-md:hidden'}
+        ${isOpen ? 'block' : 'hidden'}
         md:block
-        max-md:fixed max-md:inset-0 max-md:top-16 max-md:z-40 max-md:overflow-y-auto max-md:bg-[--card] max-md:p-4
-        md:sticky md:top-[calc(64px+1.5rem)] md:h-fit md:max-h-[calc(100vh-64px-3rem)] md:overflow-y-auto md:rounded-xl md:border md:border-[--border] md:p-4
+        max-md:fixed max-md:inset-0 max-md:top-16 max-md:z-40 max-md:overflow-y-auto max-md:bg-white max-md:p-4 dark:max-md:bg-gray-900
       `}>
         {units.map(unit => (
           <div key={unit.id} className="mb-3">
