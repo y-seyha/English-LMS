@@ -3,6 +3,10 @@ import Modal from '../../components/ui/Modal'
 import { useCreateVocabulary, useUpdateVocabulary } from '../../api/vocabulary'
 import { showSuccess, showError } from '../../utils/toast'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { Button } from '@/components/ui/button'
+import { Input as UIInput } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select as SelectRadix, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 interface Props {
   open: boolean
@@ -81,14 +85,8 @@ export default function VocabularyFormModal({ open, onClose, initialData }: Prop
         </div>
         <div className="grid grid-cols-2 gap-4">
           <Input label="Part of Speech" value={form.partOfSpeech} onChange={v => setForm(f => ({ ...f, partOfSpeech: v }))} />
-          <div>
-            <label className="mb-1 block text-xs font-medium text-black/60 dark:text-white/60">Level</label>
-            <select value={form.level} onChange={e => setForm(f => ({ ...f, level: e.target.value }))}
-              className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-black dark:border-white/10 dark:bg-black dark:text-white">
-              <option value="beginner">Beginner</option>
-              <option value="intermediate">Intermediate</option>
-            </select>
-          </div>
+          <Select label="Level" value={form.level} onChange={v => setForm(f => ({ ...f, level: v }))}
+            options={[{ value: 'beginner', label: 'Beginner' }, { value: 'intermediate', label: 'Intermediate' }]} />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <Input label="Meaning (EN)" value={form.meaningEn} onChange={v => setForm(f => ({ ...f, meaningEn: v }))} />
@@ -98,26 +96,22 @@ export default function VocabularyFormModal({ open, onClose, initialData }: Prop
           <Input label="Example (EN)" value={form.exampleEn} onChange={v => setForm(f => ({ ...f, exampleEn: v }))} />
           <Input label="Example (KM)" value={form.exampleKm} onChange={v => setForm(f => ({ ...f, exampleKm: v }))} />
         </div>
-        <div>
-          <label className="mb-1 block text-xs font-medium text-black/60 dark:text-white/60">Category</label>
-          <select value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
-            className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-black dark:border-white/10 dark:bg-black dark:text-white">
-            <option value="general">General</option>
-            <option value="jobs">Jobs</option>
-            <option value="food">Food</option>
-            <option value="travel">Travel</option>
-            <option value="education">Education</option>
-            <option value="daily">Daily Life</option>
-          </select>
-        </div>
+        <Select label="Category" value={form.category} onChange={v => setForm(f => ({ ...f, category: v }))}
+          options={[
+            { value: 'general', label: 'General' },
+            { value: 'jobs', label: 'Jobs' },
+            { value: 'food', label: 'Food' },
+            { value: 'travel', label: 'Travel' },
+            { value: 'education', label: 'Education' },
+            { value: 'daily', label: 'Daily Life' },
+          ]} />
         <div className="flex justify-end gap-2 pt-2">
-          <button onClick={onClose} className="rounded-lg border border-black/10 px-4 py-2 text-sm text-black hover:bg-black/5 dark:border-white/10 dark:text-white dark:hover:bg-white/10">
+          <Button variant="outline" onClick={onClose}>
             {language === 'en' ? 'Cancel' : 'បោះបង់'}
-          </button>
-          <button onClick={handleSave} disabled={busy || !form.word}
-            className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-black/80 disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-white/80">
+          </Button>
+          <Button onClick={handleSave} disabled={busy || !form.word}>
             {busy ? '...' : (isEdit ? (language === 'en' ? 'Update' : 'កែប្រែ') : (language === 'en' ? 'Create' : 'បង្កើត'))}
-          </button>
+          </Button>
         </div>
       </div>
     </Modal>
@@ -126,10 +120,25 @@ export default function VocabularyFormModal({ open, onClose, initialData }: Prop
 
 function Input({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
-    <div>
-      <label className="mb-1 block text-xs font-medium text-black/60 dark:text-white/60">{label}</label>
-      <input type="text" value={value} onChange={e => onChange(e.target.value)}
-        className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-black outline-none focus:border-black dark:border-white/10 dark:bg-black dark:text-white dark:focus:border-white" />
+    <div className="space-y-1.5">
+      <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
+      <UIInput type="text" value={value} onChange={e => onChange(e.target.value)} />
+    </div>
+  )
+}
+
+function Select({ label, value, onChange, options }: { label: string; value: string; onChange: (v: string) => void; options: { value: string; label: string }[] }) {
+  return (
+    <div className="space-y-1.5">
+      <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
+      <SelectRadix value={value} onValueChange={onChange}>
+        <SelectTrigger>
+          <SelectValue placeholder="Select..." />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+        </SelectContent>
+      </SelectRadix>
     </div>
   )
 }

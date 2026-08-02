@@ -7,11 +7,18 @@ import {
   EyeOff,
   Languages,
   Volume2,
+  Clock,
 } from "lucide-react";
 import { useBilingualText, useLanguage } from "../../contexts/LanguageContext";
 import { useStory } from "../../api/stories";
 import { useProgress, useCompleteStory } from "../../api/progress";
 import { useSpeech } from "../../hooks/useSpeech";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import Spinner from "@/components/ui/Spinner";
+import EmptyState from "@/components/ui/EmptyState";
+import Badge from "../../components/ui/Badge";
 
 export default function StoryReaderPage() {
   const { storyId } = useParams<{ storyId: string }>();
@@ -31,30 +38,25 @@ export default function StoryReaderPage() {
   const isCompleted = storyId ? completedStories.includes(storyId) : false;
 
   if (isLoading) {
-    return <div className="py-12 text-center text-muted">Loading story...</div>;
+    return <Spinner />;
   }
 
   if (!story) {
     return (
-      <div className="py-12 text-center">
-        <BookOpen
-          size={48}
-          className="mx-auto mb-4"
-          style={{ color: "var(--muted)" }}
-        />
-        <h3
-          className="mb-2 text-lg font-semibold"
-          style={{ color: "var(--foreground)" }}
-        >
-          {language === "en" ? "Story not found" : "រកមិនឃើញរឿងទេ"}
-        </h3>
-        <button
-          className="mt-4 rounded-lg bg-[--primary] px-5 py-[0.625rem] text-sm font-medium dark:text-white cursor-pointer"
-          onClick={() => navigate("/learn/stories")}
-        >
-          {language === "en" ? "Back to Stories" : "ត្រឡប់ទៅរឿងវិញ"}
-        </button>
-      </div>
+      <EmptyState
+        icon={<BookOpen size={24} />}
+        title={language === "en" ? "Story not found" : "រកមិនឃើញរឿងទេ"}
+        description={
+          language === "en"
+            ? "The story you are looking for does not exist."
+            : "រឿងដែលអ្នកកំពុងស្វែងរក មិនមានទេ។"
+        }
+        action={
+          <Button onClick={() => navigate("/learn/stories")}>
+            {language === "en" ? "Back to Stories" : "ត្រឡប់ទៅរឿងវិញ"}
+          </Button>
+        }
+      />
     );
   }
 
@@ -77,46 +79,42 @@ export default function StoryReaderPage() {
   ).length;
 
   return (
-    <div className="animate-[fadeIn_300ms_ease] py-8">
-      <button
-        className="mb-4 inline-flex items-center gap-2 text-sm font-medium dark:text-white cursor-pointer transition-all hover:text-[--primary]"
+    <div className="space-y-8">
+      <Button
+        variant="ghost"
+        className="-ml-2"
         onClick={() => navigate("/learn/stories")}
       >
-        <ArrowLeft size={16} />{" "}
+        <ArrowLeft size={16} />
         {language === "en" ? "Back to Stories" : "ត្រឡប់ទៅរឿងវិញ"}
-      </button>
-      <div className="mb-6">
-        <h1
-          className="mb-2 text-2xl font-bold"
-          style={{ color: "var(--foreground)" }}
-        >
+      </Button>
+
+      <div>
+        <h1 className="mb-2 text-2xl font-bold tracking-tight text-foreground">
           {t(story.title)}
         </h1>
         <div className="flex flex-wrap items-center gap-3">
-          <span className="rounded-full bg-[--primary]/10 px-3 py-0.5 text-xs font-medium text-[--primary]">
-            {story.level}
-          </span>
-          <span className="text-sm text-muted">
-            {story.estimatedMinutes} min
+          <Badge variant={story.level}>{story.level}</Badge>
+          <span className="flex items-center gap-1 text-sm text-muted-foreground">
+            <Clock size={14} /> {story.estimatedMinutes} min
           </span>
           {isCompleted && (
-            <span className="inline-flex items-center gap-1 text-sm text-emerald-500">
-              <CheckCircle2 size={14} />{" "}
+            <span className="inline-flex items-center gap-1 text-sm text-success">
+              <CheckCircle2 size={14} />
               {language === "en" ? "Completed" : "បានបញ្ចប់"}
             </span>
           )}
         </div>
       </div>
 
-      <div className="mb-6 flex flex-wrap items-center gap-3">
-        {/* Toggle Khmer Button */}
+      <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
           onClick={() => setShowKhmer(!showKhmer)}
-          className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-bold transition-all duration-300 ease-out active:scale-95 ${
+          className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold transition-all active:scale-95 ${
             showKhmer
-              ? "scale-105 bg-blue-600 text-white shadow-md shadow-blue-500/30 ring-2 ring-blue-600 ring-offset-2 dark:ring-offset-zinc-900"
-              : "border border-[--border] bg-[--bg-secondary] text-[--foreground] dark:text-white hover:border-blue-400/50 hover:bg-[--card]"
+              ? "bg-primary text-primary-foreground shadow-sm"
+              : "border border-border bg-card text-foreground hover:bg-accent"
           }`}
         >
           {showKhmer ? (
@@ -135,33 +133,29 @@ export default function StoryReaderPage() {
           </span>
         </button>
 
-        {/* Listen / Audio Button */}
         <button
           type="button"
           onClick={() => speak(story.content?.en ?? "")}
-          className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-[--border] bg-[--bg-secondary] px-4 py-1.5 text-xs font-bold text-[--foreground] transition-all duration-300 ease-out hover:border-blue-400/50 hover:bg-[--card] active:scale-95 dark:text-white"
+          className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-border bg-card px-4 py-1.5 text-xs font-semibold text-foreground transition-all hover:bg-accent active:scale-95"
         >
-          <Volume2 size={14} className="stroke-[2.5] text-blue-500" />
+          <Volume2 size={14} className="stroke-[2.5] text-primary" />
           <span>{language === "en" ? "Listen" : "ស្តាប់"}</span>
         </button>
       </div>
-      <div
-        className="mb-8 rounded-xl border border-[--border] bg-[--card] p-6 leading-relaxed"
-        style={{ color: "var(--foreground)" }}
-      >
+
+      <Card className="p-6 leading-relaxed text-foreground">
         <p>{story.content?.en}</p>
         {showKhmer && story.content?.km && (
-          <div className="mt-4 border-t border-[--border] pt-4 text-muted">
-            <p>{story.content.km}</p>
+          <div className="animate-fade-in">
+            <Separator className="my-4" />
+            <p className="text-muted-foreground">{story.content.km}</p>
           </div>
         )}
-      </div>
+      </Card>
+
       {story.questions?.length > 0 && (
-        <div className="mb-8">
-          <h2
-            className="mb-4 text-lg font-semibold"
-            style={{ color: "var(--foreground)" }}
-          >
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold text-foreground">
             {language === "en" ? "Comprehension Questions" : "សំណួរយល់ដឹង"}
           </h2>
           {story.questions.map((q: any, i: number) => {
@@ -170,20 +164,17 @@ export default function StoryReaderPage() {
             const isWrong =
               submitted && selected && selected !== q.correctAnswer;
             return (
-              <div
+              <Card
                 key={q.id}
-                className={`mb-4 rounded-xl border p-5 ${
+                className={`p-5 ${
                   isCorrect
-                    ? "border-emerald-300 bg-emerald-50/50 dark:border-emerald-700 dark:bg-emerald-950/20"
+                    ? "border-success/40 bg-success/10"
                     : isWrong
-                      ? "border-red-300 bg-red-50/50 dark:border-red-700 dark:bg-red-950/20"
-                      : "border-[--border] bg-[--card]"
+                      ? "border-destructive/40 bg-destructive/10"
+                      : "bg-card"
                 }`}
               >
-                <p
-                  className="mb-3 font-medium"
-                  style={{ color: "var(--foreground)" }}
-                >
+                <p className="mb-3 font-medium text-foreground">
                   {i + 1}. {t(q.question)}
                 </p>
                 <div className="flex flex-col gap-2">
@@ -195,12 +186,14 @@ export default function StoryReaderPage() {
                       "flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm cursor-pointer transition-all";
                     if (submitted && optionCorrect)
                       cls +=
-                        " border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30";
+                        " border-success bg-success/10 text-foreground";
                     else if (submitted && optionSelected && !optionCorrect)
-                      cls += " border-red-500 bg-red-50 dark:bg-red-900/30";
+                      cls += " border-destructive bg-destructive/10";
                     else if (optionSelected)
-                      cls += " border-blue-500 bg-blue-50 dark:bg-sky-900/30";
-                    else cls += " border-[--border] hover:border-[--primary]";
+                      cls += " border-primary bg-primary/10";
+                    else
+                      cls +=
+                        " border-border bg-card hover:border-primary/50 hover:bg-accent";
                     return (
                       <label
                         key={j}
@@ -209,54 +202,61 @@ export default function StoryReaderPage() {
                       >
                         <span
                           className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 ${
-                            optionSelected
-                              ? "border-blue-500"
-                              : "border-[--border]"
+                            submitted && optionCorrect
+                              ? "border-success"
+                              : submitted && optionSelected && !optionCorrect
+                                ? "border-destructive"
+                                : optionSelected
+                                  ? "border-primary"
+                                  : "border-border"
                           }`}
                         >
                           {optionSelected && (
-                            <span className="h-2 w-2 rounded-full bg-blue-500" />
+                            <span
+                              className={`h-2 w-2 rounded-full ${
+                                submitted && optionCorrect
+                                  ? "bg-success"
+                                  : submitted && optionSelected && !optionCorrect
+                                    ? "bg-destructive"
+                                    : "bg-primary"
+                              }`}
+                            />
                           )}
                         </span>
-                        <span style={{ color: "var(--foreground)" }}>
-                          {val}
-                        </span>
+                        <span className="text-foreground">{val}</span>
                       </label>
                     );
                   })}
                 </div>
                 {submitted && (
                   <p
-                    className={`mt-2 text-sm ${isCorrect ? "text-emerald-600" : "text-red-500"}`}
+                    className={`mt-2 text-sm ${isCorrect ? "text-success" : "text-destructive"}`}
                   >
                     {isCorrect
                       ? `✓ ${t(q.explanation)}`
                       : `✗ ${t(q.explanation)}`}
                   </p>
                 )}
-              </div>
+              </Card>
             );
           })}
           {!submitted && (
-            <button
+            <Button
               type="button"
               onClick={handleSubmit}
               disabled={story.questions.some((q: any) => !answers[q.id])}
-              className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-blue-500/20 transition-all duration-300 ease-out hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/30 active:scale-95 disabled:cursor-not-allowed disabled:bg-zinc-300 disabled:text-zinc-500 disabled:shadow-none disabled:active:scale-100 dark:disabled:bg-zinc-800 dark:disabled:text-zinc-600"
             >
               <CheckCircle2 size={16} className="stroke-[2.5]" />
-              <span>{language === "en" ? "Submit Answers" : "ដាក់ចម្លើយ"}</span>
-            </button>
+              {language === "en" ? "Submit Answers" : "ដាក់ចម្លើយ"}
+            </Button>
           )}
           {submitted && (
             <p
-              className="mt-3 text-sm font-medium"
-              style={{
-                color:
-                  correctCount === story.questions.length
-                    ? "var(--success)"
-                    : "var(--warning)",
-              }}
+              className={`text-sm font-medium ${
+                correctCount === story.questions.length
+                  ? "text-success"
+                  : "text-warning"
+              }`}
             >
               {correctCount}/{story.questions.length}{" "}
               {language === "en" ? "correct" : "ត្រឹមត្រូវ"}

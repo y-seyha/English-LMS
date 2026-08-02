@@ -1,4 +1,5 @@
 import { BookOpen, PencilRuler, Home, ListChecks } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export type StepType = "lesson" | "exercises" | "homework" | "quiz";
 
@@ -34,33 +35,23 @@ export default function StepNavigation({
   };
 
   return (
-    <div className="mt-8 flex flex-wrap items-center gap-2 border-t border-[--border] pt-6">
+    <div className="mt-8 flex flex-wrap items-center gap-1 rounded-xl bg-muted/20 p-1">
       {steps.map((s, i) => {
         const Icon = s.icon;
         const isActive = currentStep === s.key;
         const isDone = steps.findIndex((st) => st.key === currentStep) > i;
 
-        // Base classes: Added !text-white to active state to ensure contrast
-        let btnCls =
-          "inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 border border-transparent ";
-
-        if (isActive) {
-          // Force text to white for the primary active button
-          btnCls +=
-            " bg-black dark:bg-white dark:text-black text-white shadow-md";
-        } else if (isDone) {
-          // Use a dark/muted text color for success to ensure it's not white
-          btnCls += " bg-[--success] text-[--background] opacity-90";
-        } else {
-          // Explicitly set text to --foreground (or --muted) and background to a light/dark shade
-          btnCls +=
-            " bg-[--border] text-[--foreground] hover:bg-slate-300 dark:hover:bg-slate-700";
-        }
-
         return (
           <button
             key={s.key}
-            className={btnCls}
+            className={cn(
+              "inline-flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 sm:flex-none",
+              isActive
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : isDone
+                  ? "bg-success/10 text-success hover:bg-success/15"
+                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
+            )}
             onClick={() => onStepChange(s.key)}
           >
             <Icon size={16} />

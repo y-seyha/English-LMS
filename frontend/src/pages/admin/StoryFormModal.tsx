@@ -3,6 +3,11 @@ import Modal from '../../components/ui/Modal'
 import { useCreateStory, useUpdateStory } from '../../api/stories'
 import { showSuccess, showError } from '../../utils/toast'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { Button } from '@/components/ui/button'
+import { Input as UIInput } from '@/components/ui/input'
+import { Textarea as UITextarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
+import { Select as SelectRadix, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Plus, Trash2 } from 'lucide-react'
 
 interface Props {
@@ -102,16 +107,17 @@ export default function StoryFormModal({ open, onClose, initialData }: Props) {
         <Textarea label="Content (KM)" value={form.contentKm} onChange={v => setForm(f => ({ ...f, contentKm: v }))} />
 
         {/* Questions */}
-        <div className="border-t border-black/10 pt-4 dark:border-white/10">
-          <h4 className="mb-3 text-sm font-semibold text-black dark:text-white">
+        <div className="border-t pt-4">
+          <h4 className="mb-3 text-sm font-semibold text-foreground">
             {language === 'en' ? 'Comprehension Questions' : 'សំណួរយល់ដឹង'}
           </h4>
           {form.questions.map((q, i) => (
-            <div key={q.id} className="mb-3 rounded-lg border border-black/10 p-3 dark:border-white/10">
+            <div key={q.id} className="mb-3 rounded-lg border bg-card p-3">
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-xs font-medium text-black/60 dark:text-white/60">Q #{i + 1}</span>
-                <button onClick={() => setForm(f => ({ ...f, questions: f.questions.filter((_, j) => j !== i) }))}
-                  className="text-red-400 hover:text-red-600"><Trash2 size={14} /></button>
+                <span className="text-xs font-medium text-muted-foreground">Q #{i + 1}</span>
+                <Button variant="ghost" size="icon-sm" className="text-destructive hover:bg-destructive/10" onClick={() => setForm(f => ({ ...f, questions: f.questions.filter((_, j) => j !== i) }))}>
+                  <Trash2 size={14} />
+                </Button>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <Input label="Question (EN)" value={q.questionEn} onChange={v => updateQuestion(i, { questionEn: v })} />
@@ -122,15 +128,13 @@ export default function StoryFormModal({ open, onClose, initialData }: Props) {
                   options={[{ value: 'multiple-choice', label: 'Multiple Choice' }, { value: 'true-false', label: 'True/False' }]} />
                 <Input label="Correct Answer" value={q.correctAnswer} onChange={v => updateQuestion(i, { correctAnswer: v })} />
               </div>
-              <div className="mt-2">
-                <label className="mb-1 block text-xs font-medium text-black/60 dark:text-white/60">Options (EN, comma-separated)</label>
-                <input type="text" value={q.optionsEn.join(', ')} onChange={e => updateQuestion(i, { optionsEn: e.target.value.split(',').map(s => s.trim()) })}
-                  className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-black dark:border-white/10 dark:bg-black dark:text-white" />
+              <div className="mt-2 space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">Options (EN, comma-separated)</Label>
+                <UIInput type="text" value={q.optionsEn.join(', ')} onChange={e => updateQuestion(i, { optionsEn: e.target.value.split(',').map(s => s.trim()) })} />
               </div>
-              <div className="mt-2">
-                <label className="mb-1 block text-xs font-medium text-black/60 dark:text-white/60">Options (KM, comma-separated)</label>
-                <input type="text" value={q.optionsKm.join(', ')} onChange={e => updateQuestion(i, { optionsKm: e.target.value.split(',').map(s => s.trim()) })}
-                  className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-black dark:border-white/10 dark:bg-black dark:text-white" />
+              <div className="mt-2 space-y-1.5">
+                <Label className="text-xs font-medium text-muted-foreground">Options (KM, comma-separated)</Label>
+                <UIInput type="text" value={q.optionsKm.join(', ')} onChange={e => updateQuestion(i, { optionsKm: e.target.value.split(',').map(s => s.trim()) })} />
               </div>
               <div className="mt-2 grid grid-cols-2 gap-2">
                 <Input label="Explanation (EN)" value={q.explanationEn} onChange={v => updateQuestion(i, { explanationEn: v })} />
@@ -138,21 +142,19 @@ export default function StoryFormModal({ open, onClose, initialData }: Props) {
               </div>
             </div>
           ))}
-          <button onClick={() => setForm(f => ({ ...f, questions: [...f.questions, { id: uid(), questionEn: '', questionKm: '', type: 'multiple-choice', optionsEn: [], optionsKm: [], correctAnswer: '', explanationEn: '', explanationKm: '' }] }))}
-            className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700 dark:text-sky-400">
+          <Button variant="link" size="sm" className="h-auto px-0 text-xs" onClick={() => setForm(f => ({ ...f, questions: [...f.questions, { id: uid(), questionEn: '', questionKm: '', type: 'multiple-choice', optionsEn: [], optionsKm: [], correctAnswer: '', explanationEn: '', explanationKm: '' }] }))}>
             <Plus size={14} /> {language === 'en' ? 'Add Question' : 'បន្ថែមសំណួរ'}
-          </button>
+          </Button>
         </div>
       </div>
 
-      <div className="mt-4 flex justify-end gap-2 border-t border-black/10 pt-4 dark:border-white/10">
-        <button onClick={onClose} className="rounded-lg border border-black/10 px-4 py-2 text-sm text-black hover:bg-black/5 dark:border-white/10 dark:text-white dark:hover:bg-white/10">
+      <div className="mt-4 flex justify-end gap-2 border-t pt-4">
+        <Button variant="outline" onClick={onClose}>
           {language === 'en' ? 'Cancel' : 'បោះបង់'}
-        </button>
-        <button onClick={handleSave} disabled={busy || !form.titleEn}
-          className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-black/80 disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-white/80">
+        </Button>
+        <Button onClick={handleSave} disabled={busy || !form.titleEn}>
           {busy ? '...' : (isEdit ? (language === 'en' ? 'Update' : 'កែប្រែ') : (language === 'en' ? 'Create' : 'បង្កើត'))}
-        </button>
+        </Button>
       </div>
     </Modal>
   )
@@ -160,32 +162,34 @@ export default function StoryFormModal({ open, onClose, initialData }: Props) {
 
 function Input({ label, value, onChange, type = 'text' }: { label: string; value: string; onChange: (v: string) => void; type?: string }) {
   return (
-    <div>
-      <label className="mb-1 block text-xs font-medium text-black/60 dark:text-white/60">{label}</label>
-      <input type={type} value={value} onChange={e => onChange(e.target.value)}
-        className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-black outline-none focus:border-black dark:border-white/10 dark:bg-black dark:text-white dark:focus:border-white" />
+    <div className="space-y-1.5">
+      <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
+      <UIInput type={type} value={value} onChange={e => onChange(e.target.value)} />
     </div>
   )
 }
 
 function Textarea({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
-    <div>
-      <label className="mb-1 block text-xs font-medium text-black/60 dark:text-white/60">{label}</label>
-      <textarea value={value} onChange={e => onChange(e.target.value)} rows={3}
-        className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-black outline-none focus:border-black dark:border-white/10 dark:bg-black dark:text-white dark:focus:border-white" />
+    <div className="space-y-1.5">
+      <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
+      <UITextarea value={value} onChange={e => onChange(e.target.value)} rows={3} />
     </div>
   )
 }
 
 function Select({ label, value, onChange, options }: { label: string; value: string; onChange: (v: string) => void; options: { value: string; label: string }[] }) {
   return (
-    <div>
-      <label className="mb-1 block text-xs font-medium text-black/60 dark:text-white/60">{label}</label>
-      <select value={value} onChange={e => onChange(e.target.value)}
-        className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-black dark:border-white/10 dark:bg-black dark:text-white">
-        {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-      </select>
+    <div className="space-y-1.5">
+      <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
+      <SelectRadix value={value} onValueChange={onChange}>
+        <SelectTrigger>
+          <SelectValue placeholder="Select..." />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+        </SelectContent>
+      </SelectRadix>
     </div>
   )
 }

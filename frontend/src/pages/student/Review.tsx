@@ -2,19 +2,23 @@ import { useState } from 'react'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { useReviewItems, useCompleteReview } from '../../api/review'
 import { RefreshCw, CheckCircle2, Loader2 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+import PageHeader from '@/components/ui/PageHeader'
+import EmptyState from '@/components/ui/EmptyState'
 import Pagination from '../../components/ui/Pagination'
+import Badge from '../../components/ui/Badge'
 
 function SkeletonCard() {
   return (
-    <div className="animate-pulse rounded-xl border border-black/10 bg-white p-5 dark:border-white/10 dark:bg-black">
-      <div className="mb-3">
-        <div className="mb-2 h-4 w-3/4 rounded bg-black/10 dark:bg-white/10" />
-        <div className="flex gap-4">
-          <div className="h-4 w-1/3 rounded bg-black/10 dark:bg-white/10" />
-          <div className="h-4 w-1/3 rounded bg-black/10 dark:bg-white/10" />
-        </div>
+    <div className="space-y-3 rounded-xl border bg-card p-5 shadow-card">
+      <Skeleton className="h-4 w-3/4" />
+      <div className="flex gap-4">
+        <Skeleton className="h-4 w-1/3" />
+        <Skeleton className="h-4 w-1/3" />
       </div>
-      <div className="h-8 w-32 rounded-lg bg-black/10 dark:bg-white/10" />
+      <Skeleton className="h-8 w-32 rounded-lg" />
     </div>
   )
 }
@@ -26,58 +30,63 @@ export default function Review() {
   const completeReview = useCompleteReview()
 
   return (
-    <div className="animate-[fadeIn_300ms_ease] py-8">
-      <div className="mb-6">
-        <h1 className="mb-2 text-[1.875rem] font-bold" style={{ color: 'var(--foreground)' }}>
-          {language === 'en' ? 'Review Wrong Answers' : 'ពិនិត្យចម្លើយខុស'}
-        </h1>
-        <p className="text-[1.0625rem] text-muted">
-          {language === 'en' ? 'Review and practice questions you got wrong' : 'ពិនិត្យ និងអនុវត្តសំណួរដែលអ្នកឆ្លើយខុស'}
-        </p>
-      </div>
+    <div className="space-y-8">
+      <PageHeader
+        title={language === 'en' ? 'Review Wrong Answers' : 'ពិនិត្យចម្លើយខុស'}
+        description={language === 'en' ? 'Review and practice questions you got wrong' : 'ពិនិត្យ និងអនុវត្តសំណួរដែលអ្នកឆ្លើយខុស'}
+      />
 
       {isLoading ? (
         <div className="space-y-4">
-          <SkeletonCard key="sk1" />
-          <SkeletonCard key="sk2" />
-          <SkeletonCard key="sk3" />
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
         </div>
       ) : data?.data?.length === 0 ? (
-        <div className="py-12 text-center">
-          <RefreshCw size={48} className="mx-auto mb-4" style={{ color: 'var(--muted)' }} />
-          <p className="text-muted">{language === 'en' ? 'No items to review. Great job!' : 'គ្មានអ្វីត្រូវពិនិត្យទេ'}</p>
-        </div>
+        <EmptyState
+          icon={<RefreshCw size={24} />}
+          title={language === 'en' ? 'Nothing to review' : 'គ្មានអ្វីត្រូវពិនិត្យទេ'}
+          description={language === 'en' ? 'Great job! No items to review right now.' : 'ធ្វើបានល្អ! មិនមានអ្វីត្រូវពិនិត្យនៅពេលនេះទេ។'}
+        />
       ) : (
         <>
           <div className="space-y-4">
-            {data?.data?.map((item: any) => (
-              <div key={item._id} className="rounded-xl border border-[--border] bg-[--card] p-5 shadow-[--shadow]">
-                <div className="mb-3">
-                  <p className="mb-2 text-sm font-semibold" style={{ color: 'var(--foreground)' }}>{item.questionText || `Question: ${item.lessonId}`}</p>
-                  <div className="flex flex-wrap gap-4 text-sm">
-                    <span className="text-red-500">
+            {data?.data?.map((item: any) => {
+              const isPending = completeReview.isPending && completeReview.variables === item._id
+              return (
+                <Card key={item._id} className="p-5">
+                  <p className="mb-2 text-sm font-semibold text-foreground">{item.questionText || `Question: ${item.lessonId}`}</p>
+                  <div className="mb-3 flex flex-wrap gap-x-4 gap-y-1 text-sm">
+                    <span className="text-destructive">
                       {language === 'en' ? 'Your answer:' : 'ចម្លើយអ្នក៖'} {item.selectedAnswer}
                     </span>
-                    <span className="text-emerald-500">
+                    <span className="text-success">
                       {language === 'en' ? 'Correct:' : 'ត្រឹមត្រូវ៖'} {item.correctAnswer}
                     </span>
                   </div>
-                </div>
-                {!item.reviewed && (
-                  <button
-                    onClick={() => completeReview.mutate(item._id)}
-                    disabled={completeReview.isPending && completeReview.variables === item._id}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 px-3 py-1.5 text-xs font-medium text-emerald-600 transition-all hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-950/30"
-                  >
-                    {completeReview.isPending && completeReview.variables === item._id ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
-                    {language === 'en' ? 'Mark Reviewed' : 'សម្គាល់ថាបានពិនិត្យ'}
-                  </button>
-                )}
-                {item.reviewed && (
-                  <span className="text-xs text-muted">{language === 'en' ? 'Reviewed' : 'បានពិនិត្យ'}</span>
-                )}
-              </div>
-            ))}
+                  {!item.reviewed && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => completeReview.mutate(item._id)}
+                      disabled={isPending}
+                    >
+                      {isPending ? (
+                        <Loader2 size={14} className="animate-spin" />
+                      ) : (
+                        <CheckCircle2 size={14} className="text-success" />
+                      )}
+                      {language === 'en' ? 'Mark Reviewed' : 'សម្គាល់ថាបានពិនិត្យ'}
+                    </Button>
+                  )}
+                  {item.reviewed && (
+                    <Badge variant="success">
+                      {language === 'en' ? 'Reviewed' : 'បានពិនិត្យ'}
+                    </Badge>
+                  )}
+                </Card>
+              )
+            })}
           </div>
           <Pagination
             page={data?.page ?? 1}

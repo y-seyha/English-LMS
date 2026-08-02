@@ -1,4 +1,14 @@
-import { ChevronUp, ChevronDown } from 'lucide-react'
+import { ChevronUp, ChevronDown, Inbox } from 'lucide-react'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from './table'
+import { Skeleton } from './skeleton'
+import { cn } from '../../lib/utils'
 
 interface Column<T> {
   key: string
@@ -14,28 +24,45 @@ interface DataTableProps<T> {
   order?: 'asc' | 'desc'
   onSort?: (key: string) => void
   isLoading?: boolean
+  emptyMessage?: string
 }
 
 export default function DataTable<T extends Record<string, unknown>>({
-  columns, data, sort, order, onSort, isLoading,
+  columns, data, sort, order, onSort, isLoading, emptyMessage = 'No data found',
 }: DataTableProps<T>) {
   if (isLoading) {
     return (
-      <div className="rounded-xl border border-black/10 bg-white p-12 text-center text-black dark:border-white/10 dark:bg-black dark:text-white">
-        Loading...
+      <div className="overflow-hidden rounded-xl border bg-card shadow-card">
+        <div className="flex h-11 items-center gap-4 border-b bg-muted/30 px-4">
+          {columns.map(col => (
+            <Skeleton key={col.key} className="h-3.5 w-20" />
+          ))}
+        </div>
+        <div className="divide-y">
+          {[0, 1, 2, 3, 4].map(row => (
+            <div key={row} className="flex items-center gap-4 px-4 py-3.5">
+              {columns.map(col => (
+                <Skeleton
+                  key={col.key}
+                  className={cn('h-3.5', col.key === '_actions' ? 'w-6' : 'w-24')}
+                />
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-black/10 dark:border-white/10">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b border-black/10 bg-black/2 dark:border-white/10 dark:bg-white/4">
+    <div className="overflow-x-auto rounded-xl border bg-card shadow-card">
+      <Table>
+        <TableHeader>
+          <TableRow className="bg-muted/30 hover:bg-muted/30">
             {columns.map(col => (
-              <th
+              <TableHead
                 key={col.key}
-                className={`px-4 py-3 text-left font-medium text-black dark:text-white ${col.sortable ? 'cursor-pointer select-none hover:text-black dark:hover:text-white' : ''}`}
+                className={cn(col.sortable && 'cursor-pointer select-none')}
                 onClick={() => col.sortable && onSort?.(col.key)}
               >
                 <span className="inline-flex items-center gap-1">
@@ -44,29 +71,33 @@ export default function DataTable<T extends Record<string, unknown>>({
                     order === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />
                   )}
                 </span>
-              </th>
+              </TableHead>
             ))}
-          </tr>
-        </thead>
-        <tbody>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {data.map((item, i) => (
-              <tr key={i} className="border-b border-black/10 last:border-0 hover:bg-black/2 dark:border-white/10 dark:hover:bg-white/4">
+            <TableRow key={i}>
               {columns.map(col => (
-                <td key={col.key} className="px-4 py-3 text-black dark:text-white">
+                <TableCell key={col.key} className="text-foreground">
                   {col.render ? col.render(item) : String(item[col.key] ?? '')}
-                </td>
+                </TableCell>
               ))}
-            </tr>
+            </TableRow>
           ))}
           {data.length === 0 && (
-            <tr>
-              <td colSpan={columns.length} className="px-4 py-12 text-center text-black dark:text-white">
-                No data found
-              </td>
-            </tr>
+            <TableRow>
+              <TableCell colSpan={columns.length} className="py-14">
+                <div className="flex flex-col items-center gap-2">
+                  <Inbox size={28} className="text-muted-foreground/60" />
+                  <p className="text-sm font-medium text-foreground">{emptyMessage}</p>
+                  <p className="text-xs text-muted-foreground">No results to show here yet</p>
+                </div>
+              </TableCell>
+            </TableRow>
           )}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   )
 }

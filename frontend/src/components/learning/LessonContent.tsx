@@ -9,6 +9,8 @@ import {
   XCircle,
   HelpCircle,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface LessonContentProps {
   lesson: GrammarLesson;
@@ -37,33 +39,51 @@ function FormSection({
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <h3 className="mb-3 flex items-center gap-2 text-lg font-semibold">
-        <span style={{ color }}>{icon}</span>
+      <h3 className="mb-3 flex items-center gap-2 text-lg font-semibold text-foreground">
+        <span
+          className="flex h-7 w-7 items-center justify-center rounded-lg"
+          style={{ color, backgroundColor: `color-mix(in srgb, ${color} 12%, transparent)` }}
+        >
+          {icon}
+        </span>
         {language === "en" ? title.en : title.km}
       </h3>
-      <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 font-mono text-[0.9375rem] text-blue-700 dark:border-sky-800 dark:bg-sky-950/20 dark:text-sky-300">
-        {structure}
+      <div className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3">
+        <code className="font-mono text-[0.9375rem] leading-relaxed text-primary">{structure}</code>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="shrink-0 text-primary/70 hover:text-primary"
+          onClick={() => speak(structure)}
+          title="Listen"
+          aria-label="Listen to structure"
+        >
+          <Speaker size={15} />
+        </Button>
       </div>
       <div className="flex flex-col gap-2">
         {examples.map((ex, i) => (
           <motion.div
             key={i}
-            className="flex items-center gap-2 rounded-lg border border-[--border] bg-black/2 px-4 py-3 dark:bg-white/2"
+            className="flex items-center gap-2 rounded-xl border border-border bg-card px-4 py-3 shadow-sm transition-colors hover:bg-accent/40"
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.08 }}
           >
-            <span className="flex-1 text-[0.9375rem]">
+            <span className="flex flex-1 items-center text-[0.9375rem] text-foreground">
               {ex.en}
-              <button
-                className="ml-1 inline-flex shrink-0 items-center justify-center rounded-lg p-[0.375rem] text-muted hover:bg-black/4 hover:text-[--primary] dark:hover:bg-white/6"
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="ml-1 text-muted-foreground hover:text-primary"
                 onClick={() => speak(ex.en)}
                 title="Listen"
+                aria-label="Listen"
               >
                 <Speaker size={14} />
-              </button>
+              </Button>
             </span>
-            <span className="text-sm text-muted">{ex.km}</span>
+            <span className="rounded-md bg-muted/40 px-2 py-0.5 text-sm text-muted-foreground">{ex.km}</span>
           </motion.div>
         ))}
       </div>
@@ -82,11 +102,11 @@ export default function LessonContent({ lesson }: LessonContentProps) {
       transition={{ duration: 0.3 }}
     >
       <motion.div
-        className="mb-8"
+        className="mb-8 rounded-xl border bg-card p-5 shadow-card"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <p className="text-base leading-relaxed dark:text-white">
+        <p className="text-base leading-relaxed text-foreground">
           {t(lesson.definition)}
         </p>
       </motion.div>
@@ -122,26 +142,41 @@ export default function LessonContent({ lesson }: LessonContentProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <h3 className="mb-3 flex items-center gap-2 text-lg font-semibold">
-            <AlertTriangle size={18} style={{ color: "var(--warning)" }} />
+          <h3 className="mb-3 flex items-center gap-2 text-lg font-semibold text-foreground">
+            <AlertTriangle size={18} className="text-warning" />
             {language === "en" ? "Common Mistakes" : "កំហុសទូទៅ"}
           </h3>
           <div className="flex flex-col gap-3">
             {lesson.commonMistakes.map((m, i) => (
               <motion.div
                 key={i}
-                className="rounded-lg border border-[--border] p-4"
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.1 }}
               >
-                <p className="mb-1 text-[--danger] line-through">{m.mistake}</p>
-                <p className="mb-2 font-medium text-[--success]">
-                  {m.correction}
-                </p>
-                <p className="text-sm leading-relaxed dark:text-white">
-                  {t(m.reason)}
-                </p>
+                <Card className="overflow-hidden">
+                  <CardContent className="space-y-3 p-4">
+                    <div className="flex items-start gap-2.5 rounded-lg border border-destructive/30 bg-destructive/5 px-3.5 py-2.5">
+                      <XCircle size={16} className="mt-0.5 shrink-0 text-destructive" />
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-destructive">
+                          {language === "en" ? "Incorrect" : "មិនត្រឹមត្រូវ"}
+                        </p>
+                        <p className="mt-0.5 line-through opacity-80">{m.mistake}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2.5 rounded-lg border border-success/30 bg-success/5 px-3.5 py-2.5">
+                      <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-success" />
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold uppercase tracking-wider text-success">
+                          {language === "en" ? "Correct" : "ត្រឹមត្រូវ"}
+                        </p>
+                        <p className="mt-0.5 font-medium">{m.correction}</p>
+                      </div>
+                    </div>
+                    <p className="text-sm leading-relaxed text-muted-foreground">{t(m.reason)}</p>
+                  </CardContent>
+                </Card>
               </motion.div>
             ))}
           </div>

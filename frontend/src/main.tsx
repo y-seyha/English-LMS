@@ -17,12 +17,14 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter
+      future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+    >
       <ThemeProvider>
         <LanguageProvider>
           <ClerkProvider
             publishableKey={CLERK_KEY}
-            appearance={{ variables: { colorPrimary: '#3b82f6' } }}
+            appearance={{ variables: { colorPrimary: '#2563eb' } }}
           >
             <QueryClientProvider client={queryClient}>
               <App />

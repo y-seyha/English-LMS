@@ -1,4 +1,5 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { Button } from './button'
 
 interface PaginationProps {
   page: number
@@ -12,27 +13,31 @@ export default function Pagination({ page, totalPages, total, onPageChange }: Pa
 
   return (
     <div className="flex items-center justify-between pt-6">
-      <span className="text-sm text-black/60 dark:text-white/60">
+      <span className="text-sm text-muted-foreground">
         {total} total items
       </span>
       <div className="flex items-center gap-2">
-        <button
+        <Button
+          variant="outline"
+          size="icon-sm"
           onClick={() => onPageChange(page - 1)}
           disabled={page <= 1}
-          className="flex h-9 w-9 items-center justify-center rounded-lg border border-black/10 transition-all hover:bg-black/4 disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:hover:bg-white/6"
+          aria-label="Previous page"
         >
-          <ChevronLeft size={16} />
-        </button>
-        <span className="min-w-[4rem] text-center text-sm font-medium">
+          <ChevronLeft />
+        </Button>
+        <span className="min-w-[4rem] text-center text-sm font-medium text-foreground">
           {page} / {totalPages}
         </span>
-        <button
+        <Button
+          variant="outline"
+          size="icon-sm"
           onClick={() => onPageChange(page + 1)}
           disabled={page >= totalPages}
-          className="flex h-9 w-9 items-center justify-center rounded-lg border border-black/10 transition-all hover:bg-black/4 disabled:cursor-not-allowed disabled:opacity-40 dark:border-white/10 dark:hover:bg-white/6"
+          aria-label="Next page"
         >
-          <ChevronRight size={16} />
-        </button>
+          <ChevronRight />
+        </Button>
       </div>
     </div>
   )

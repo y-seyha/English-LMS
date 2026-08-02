@@ -4,6 +4,10 @@ import { useGrammarUnits } from '../../api/grammar'
 import { useStories } from '../../api/stories'
 import { useNavigate } from 'react-router-dom'
 import { BookOpen, Trophy, Flame, BookMarked, Star } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+import PageHeader from '@/components/ui/PageHeader'
+import StatCard from '@/components/ui/StatCard'
 import ProgressBar from '../../components/ui/ProgressBar'
 
 export default function Progress() {
@@ -14,7 +18,23 @@ export default function Progress() {
   const { data: units } = useGrammarUnits()
   const { data: storiesData } = useStories({ pageSize: 100 })
 
-  if (isLoading) return <div className="py-12 text-center text-muted">Loading progress...</div>
+  if (isLoading) {
+    return (
+      <div className="space-y-8">
+        <Skeleton className="h-10 w-64" />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-28 rounded-xl" />
+          ))}
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[0, 1, 2].map((i) => (
+            <Skeleton key={i} className="h-32 rounded-xl" />
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   const progress = progressData?.progress
   const achievements = progressData?.achievements ?? []
@@ -32,58 +52,70 @@ export default function Progress() {
   }) ?? []
 
   return (
-    <div className="animate-[fadeIn_300ms_ease] py-8">
-      <div className="mb-8">
-        <h1 className="mb-2 text-[1.875rem] font-bold" style={{ color: 'var(--foreground)' }}>
-          {language === 'en' ? 'My Progress' : 'វឌ្ឍនភាពរបស់ខ្ញុំ'}
-        </h1>
-        <p className="text-[1.0625rem] text-muted">
-          {language === 'en' ? 'Track your learning journey' : 'តាមដានដំណើរការរៀនរបស់អ្នក'}
-        </p>
-      </div>
+    <div className="space-y-8">
+      <PageHeader
+        title={language === 'en' ? 'My Progress' : 'វឌ្ឍនភាពរបស់ខ្ញុំ'}
+        description={language === 'en' ? 'Track your learning journey' : 'តាមដានដំណើរការរៀនរបស់អ្នក'}
+      />
 
-      <div className="mb-8 grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-4">
-        <div className="rounded-xl border border-[--border] bg-[--card] p-5 text-center shadow-[--shadow]">
-          <BookOpen size={24} className="mx-auto mb-2" style={{ color: 'var(--primary)' }} />
-          <div className="mb-1 text-2xl font-bold text-[--primary]">{completedCount}/{totalLessons}</div>
-          <div className="text-xs text-muted">{language === 'en' ? 'Lessons' : 'មេរៀន'}</div>
-          <div className="mt-2"><ProgressBar value={completedCount} max={totalLessons} /></div>
-        </div>
-        <div className="rounded-xl border border-[--border] bg-[--card] p-5 text-center shadow-[--shadow]">
-          <BookMarked size={24} className="mx-auto mb-2" style={{ color: 'var(--primary)' }} />
-          <div className="mb-1 text-2xl font-bold text-[--primary]">{progress?.completedStories?.length ?? 0}/{totalStories}</div>
-          <div className="text-xs text-muted">{language === 'en' ? 'Stories' : 'រឿង'}</div>
-          <div className="mt-2"><ProgressBar value={progress?.completedStories?.length ?? 0} max={totalStories} /></div>
-        </div>
-        <div className="rounded-xl border border-[--border] bg-[--card] p-5 text-center shadow-[--shadow]">
-          <Trophy size={24} className="mx-auto mb-2" style={{ color: 'var(--primary)' }} />
-          <div className="mb-1 text-2xl font-bold text-[--primary]">{totalScore}</div>
-          <div className="text-xs text-muted">{language === 'en' ? 'Quiz Points' : 'ពិន្ទុ'}</div>
-        </div>
-        <div className="rounded-xl border border-[--border] bg-[--card] p-5 text-center shadow-[--shadow]">
-          <Flame size={24} className="mx-auto mb-2" style={{ color: 'var(--primary)' }} />
-          <div className="mb-1 text-2xl font-bold text-[--primary]">{progress?.streakCount ?? 0}</div>
-          <div className="text-xs text-muted">{language === 'en' ? 'Day Streak' : 'ថ្ងៃជាប់'}</div>
-        </div>
-        <div className="rounded-xl border border-[--border] bg-[--card] p-5 text-center shadow-[--shadow]">
-          <Star size={24} className="mx-auto mb-2" style={{ color: 'var(--primary)' }} />
-          <div className="mb-1 text-2xl font-bold text-[--primary]">{progress?.learnedWords?.length ?? 0}</div>
-          <div className="text-xs text-muted">{language === 'en' ? 'Words' : 'ពាក្យ'}</div>
-        </div>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <Card>
+          <CardContent className="p-5">
+            <div className="flex items-start gap-4">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <BookOpen size={22} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-2xl font-bold tracking-tight text-foreground">{completedCount}/{totalLessons}</div>
+                <div className="mt-0.5 text-xs font-medium text-muted-foreground">{language === 'en' ? 'Lessons' : 'មេរៀន'}</div>
+                <div className="mt-3"><ProgressBar value={completedCount} max={totalLessons} /></div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-5">
+            <div className="flex items-start gap-4">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <BookMarked size={22} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-2xl font-bold tracking-tight text-foreground">{progress?.completedStories?.length ?? 0}/{totalStories}</div>
+                <div className="mt-0.5 text-xs font-medium text-muted-foreground">{language === 'en' ? 'Stories' : 'រឿង'}</div>
+                <div className="mt-3"><ProgressBar value={progress?.completedStories?.length ?? 0} max={totalStories} /></div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <StatCard
+          icon={<Trophy size={22} />}
+          label={language === 'en' ? 'Quiz Points' : 'ពិន្ទុ'}
+          value={totalScore}
+        />
+        <StatCard
+          icon={<Flame size={22} />}
+          label={language === 'en' ? 'Day Streak' : 'ថ្ងៃជាប់'}
+          value={progress?.streakCount ?? 0}
+        />
+        <StatCard
+          icon={<Star size={22} />}
+          label={language === 'en' ? 'Words' : 'ពាក្យ'}
+          value={progress?.learnedWords?.length ?? 0}
+        />
       </div>
 
       {progress?.achievements?.length > 0 && (
-        <section className="mb-8">
-          <h2 className="mb-4 text-xl font-semibold" style={{ color: 'var(--foreground)' }}>
+        <section className="space-y-4">
+          <h2 className="text-lg font-semibold text-foreground">
             {language === 'en' ? 'Achievements Unlocked' : 'សមិទ្ធផលបានទទួល'}
           </h2>
           <div className="flex flex-wrap gap-3">
             {achievements.filter((a: any) => progress?.achievements?.includes(a.id)).map((ach: any) => (
-              <div key={ach.id} className="flex items-center gap-2 rounded-lg border border-[--border] bg-[--card] px-4 py-2 shadow-[--shadow]">
-                <span className="text-xl">{ach.icon}</span>
+              <div key={ach.id} className="flex items-center gap-3 rounded-xl border bg-card px-4 py-2.5 shadow-card">
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-xl">{ach.icon}</span>
                 <div>
-                  <div className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>{t(ach.title as any)}</div>
-                  <div className="text-xs text-muted">{t(ach.description as any)}</div>
+                  <div className="text-sm font-medium text-foreground">{t(ach.title as any)}</div>
+                  <div className="text-xs text-muted-foreground">{t(ach.description as any)}</div>
                 </div>
               </div>
             ))}
@@ -91,41 +123,45 @@ export default function Progress() {
         </section>
       )}
 
-      <section className="mb-8">
-        <h2 className="mb-4 text-xl font-semibold" style={{ color: 'var(--foreground)' }}>
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold text-foreground">
           {language === 'en' ? 'Lessons Progress' : 'វឌ្ឍនភាពមេរៀន'}
         </h2>
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {unitGroups.map((group: any, i: number) => (
-            <div key={i} className="cursor-pointer rounded-xl border border-[--border] bg-[--card] p-6 shadow-[--shadow] transition-all hover:-translate-y-0.5" onClick={() => navigate('/learn/grammar')}>
+            <Card key={i} onClick={() => navigate('/learn/grammar')}
+              className="cursor-pointer p-6 transition-all hover:-translate-y-0.5 hover:shadow-card-md">
               <div className="mb-3 flex items-start justify-between gap-4">
-                <BookOpen size={20} style={{ color: 'var(--primary)' }} />
-                <span className="text-sm text-muted">{group.doneCount}/{group.lessonCount}</span>
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <BookOpen size={20} />
+                </div>
+                <span className="text-sm text-muted-foreground">{group.doneCount}/{group.lessonCount}</span>
               </div>
-              <h3 className="mb-2 font-semibold" style={{ color: 'var(--foreground)' }}>{t(group.title as any)}</h3>
+              <h3 className="mb-2 font-semibold text-foreground">{t(group.title as any)}</h3>
               <ProgressBar value={group.doneCount} max={group.lessonCount} />
-            </div>
+            </Card>
           ))}
         </div>
       </section>
 
       {progress?.quizScores && Object.keys(progress.quizScores).length > 0 && (
-        <section>
-          <h2 className="mb-4 text-xl font-semibold" style={{ color: 'var(--foreground)' }}>
+        <section className="space-y-4">
+          <h2 className="text-lg font-semibold text-foreground">
             {language === 'en' ? 'Quiz Scores' : 'ពិន្ទុសំណួរ'}
           </h2>
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {Object.entries(progress.quizScores).map(([lessonId, score]) => {
               const lesson = allLessons.find((l: any) => l.id === lessonId)
               if (!lesson) return null
               return (
-                <div key={lessonId} className="cursor-pointer rounded-xl border border-[--border] bg-[--card] p-5 shadow-[--shadow] transition-all hover:-translate-y-0.5" onClick={() => navigate(`/learn/grammar/${lessonId}`)}>
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-semibold" style={{ color: 'var(--foreground)' }}>{t((lesson as any).title)}</h3>
-                    <span className="font-bold" style={{ color: 'var(--primary)' }}>{String(score)}%</span>
+                <Card key={lessonId} onClick={() => navigate(`/learn/grammar/${lessonId}`)}
+                  className="cursor-pointer p-5 transition-all hover:-translate-y-0.5 hover:shadow-card-md">
+                  <div className="mb-3 flex items-center justify-between gap-2">
+                    <h3 className="font-semibold text-foreground">{t((lesson as any).title)}</h3>
+                    <span className="shrink-0 font-bold text-primary">{String(score)}%</span>
                   </div>
                   <ProgressBar value={score as number} />
-                </div>
+                </Card>
               )
             })}
           </div>

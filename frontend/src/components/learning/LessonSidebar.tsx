@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router-dom';
-import { ChevronDown, CheckCircle2 } from 'lucide-react';
+import { ChevronDown, CheckCircle2, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import type { GrammarUnit } from '../../types';
-import { useBilingualText } from '../../contexts/LanguageContext';
+import { useBilingualText, useLanguage } from '../../contexts/LanguageContext';
 import { useProgress } from '../../api/progress';
+import { cn } from '@/lib/utils';
+import { Progress } from '@/components/ui/progress';
 
 interface LessonSidebarProps {
   units: GrammarUnit[];
@@ -14,10 +16,16 @@ interface LessonSidebarProps {
 
 export default function LessonSidebar({ units, currentLessonId, isOpen, onClose }: LessonSidebarProps) {
   const t = useBilingualText();
+  const { language } = useLanguage();
   const navigate = useNavigate();
   const { data: progressData } = useProgress();
   const completedLessons = progressData?.progress?.completedLessons ?? [];
   const activeRef = useRef<HTMLDivElement>(null);
+
+  const totalLessons = units.reduce(
+    (sum, unit) => sum + unit.chapters.reduce((cs, c) => cs + (c.lessons?.length ?? 0), 0),
+    0,
+  );
 
   const findCurrentUnitId = () => {
     for (const unit of units) {
@@ -52,30 +60,56 @@ export default function LessonSidebar({ units, currentLessonId, isOpen, onClose 
     );
   };
 
-  return (
-    <>
-      {isOpen && <div className="fixed inset-0 z-30 bg-black/30 md:hidden" onClick={onClose} />}
-      <aside className={`
-        ${isOpen ? 'block' : 'hidden'}
-        md:block
-        max-md:fixed max-md:inset-0 max-md:top-16 max-md:z-40 max-md:overflow-y-auto max-md:bg-white max-md:p-4 dark:max-md:bg-black
-        md:sticky md:top-6 md:max-h-[calc(100vh-8rem)] md:overflow-y-auto md:border-r md:border-black/10 md:pt-6 dark:md:border-white/10
-      `}>
+  const nav = (
+    <div className="flex h-full flex-col">
+      <div className="shrink-0 border-b px-3 pb-3 pt-2">
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            {language === 'en' ? 'Lesson Content' : 'មាតិកាមេរៀន'}
+          </p>
+          <button
+            type="button"
+            className="rounded-lg p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground lg:hidden"
+            onClick={onClose}
+            aria-label="Close lessons"
+          >
+            <X size={16} />
+          </button>
+        </div>
+        {totalLessons > 0 && (
+          <div className="mt-3">
+            <div className="mb-1.5 flex items-center justify-between text-xs text-muted-foreground">
+              <span>{language === 'en' ? 'Progress' : 'វឌ្ឍនភាព'}</span>
+              <span>
+                {completedLessons.length}/{totalLessons}
+              </span>
+            </div>
+            <Progress value={(completedLessons.length / totalLessons) * 100} className="h-1.5" />
+          </div>
+        )}
+      </div>
+
+      <div className="min-h-0 flex-1 overflow-y-auto py-2">
         {units.map(unit => (
-          <div key={unit.id} className="mb-3">
-            <div className="flex cursor-pointer items-center justify-between rounded-lg px-[0.625rem] py-2 text-sm font-semibold transition-colors hover:bg-black/4 dark:hover:bg-white/6" onClick={() => toggleUnit(unit.id)}>
+          <div key={unit.id} className="mb-1 px-1.5">
+            <div
+              className="flex cursor-pointer items-center justify-between rounded-lg px-2.5 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-accent"
+              onClick={() => toggleUnit(unit.id)}
+            >
               <span>{t(unit.title)}</span>
               <ChevronDown
                 size={16}
-                className="transition-transform duration-200"
-                style={{
-                  transform: expandedUnits.includes(unit.id) ? 'rotate(180deg)' : 'rotate(0deg)',
-                }}
+                className={cn(
+                  'text-muted-foreground transition-transform duration-200',
+                  expandedUnits.includes(unit.id) && 'rotate-180'
+                )}
               />
             </div>
             {expandedUnits.includes(unit.id) && unit.chapters.map(chapter => (
-              <div key={chapter.id} className="ml-2 mt-1">
-                <div className="px-[0.625rem] py-[0.375rem] text-xs font-semibold uppercase tracking-wider text-black dark:text-white">{t(chapter.title)}</div>
+              <div key={chapter.id} className="ml-1.5 mt-0.5">
+                <div className="px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  {t(chapter.title)}
+                </div>
                 {chapter.lessons.map(lesson => {
                   const isActive = lesson.id === currentLessonId;
                   const completed = completedLessons.includes(lesson.id);
@@ -83,13 +117,23 @@ export default function LessonSidebar({ units, currentLessonId, isOpen, onClose 
                     <div
                       key={lesson.id}
                       ref={isActive ? activeRef : undefined}
-                      className={`ml-2 flex cursor-pointer items-center gap-2 rounded-lg px-[0.625rem] py-[0.375rem] text-sm text-black dark:text-white transition-all hover:bg-black/4 hover:text-black dark:hover:bg-white/6 dark:hover:text-white ${isActive ? 'bg-blue-100 font-medium dark:bg-sky-900/40' : ''}`}
+                      className={cn(
+                        'ml-2 flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm transition-all',
+                        isActive
+                          ? 'bg-primary/10 font-medium text-primary'
+                          : 'text-foreground hover:bg-accent'
+                      )}
                       onClick={() => { navigate(`/learn/grammar/${lesson.id}`); onClose(); }}
                     >
-                      <span className={`flex shrink-0 items-center justify-center rounded-full ${completed ? 'bg-emerald-500 text-white' : 'border-2 border-black/20 dark:border-white/20'} h-4 w-4 text-[0.625rem]`}>
+                      <span
+                        className={cn(
+                          'flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[0.625rem]',
+                          completed ? 'bg-success/15 text-success' : 'border-2 border-border'
+                        )}
+                      >
                         {completed ? <CheckCircle2 size={12} /> : null}
                       </span>
-                      <span>{t(lesson.title)}</span>
+                      <span className="truncate">{t(lesson.title)}</span>
                     </div>
                   );
                 })}
@@ -97,7 +141,30 @@ export default function LessonSidebar({ units, currentLessonId, isOpen, onClose 
             ))}
           </div>
         ))}
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      {isOpen && (
+        <div className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm lg:hidden" onClick={onClose} />
+      )}
+      {/* Desktop: card panel */}
+      <aside className="hidden lg:block">
+        <div className="sticky top-4 h-[calc(100vh-6rem)] overflow-hidden rounded-xl border bg-card shadow-card">
+          {nav}
+        </div>
       </aside>
+      {/* Mobile: drawer */}
+      <div
+        className={cn(
+          'fixed inset-y-0 left-0 z-40 w-[300px] max-w-[85vw] border-r bg-card shadow-lg transition-transform duration-300 ease-in-out lg:hidden',
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        )}
+      >
+        {nav}
+      </div>
     </>
   );
 }

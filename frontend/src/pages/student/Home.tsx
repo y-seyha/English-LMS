@@ -9,8 +9,15 @@ import {
   BookMarked,
   Bookmark,
   RefreshCw,
-  Loader2,
+  CheckCircle2,
+  Flame,
+  GraduationCap,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import PageHeader from "@/components/ui/PageHeader";
+import StatCard from "@/components/ui/StatCard";
 
 export default function Home() {
   const t = useBilingualText();
@@ -22,12 +29,18 @@ export default function Home() {
 
   if (progressLoading || unitsLoading) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <Loader2
-          size={32}
-          className="animate-spin"
-          style={{ color: "var(--primary)" }}
-        />
+      <div className="space-y-8">
+        <div className="h-14 w-2/3 animate-pulse rounded-lg bg-muted/30" />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[0, 1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-28 rounded-xl" />
+          ))}
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {[0, 1, 2].map((i) => (
+            <Skeleton key={i} className="h-32 rounded-xl" />
+          ))}
+        </div>
       </div>
     );
   }
@@ -53,141 +66,126 @@ export default function Home() {
     : 0;
 
   return (
-    <div className="animate-[fadeIn_300ms_ease] py-8">
-      <div className="mb-8">
-        <h1
-          className="mb-2 text-[1.875rem] font-bold"
-          style={{ color: "var(--foreground)" }}
-        >
-          {language === "en"
+    <div className="space-y-8">
+      <PageHeader
+        title={
+          language === "en"
             ? `Welcome back, ${user?.firstName ?? ""}`
-            : `សូមស្វាគមន៍ មកកាន់ EnglishEase`}
-        </h1>
-        <p className="text-[1.0625rem] dark:text-white">
-          {language === "en"
+            : "សូមស្វាគមន៍ មកកាន់ EnglishEase"
+        }
+        description={
+          language === "en"
             ? "Continue your English learning journey"
-            : "បន្តដំណើរការរៀនភាសាអង់គ្លេសរបស់អ្នក"}
-        </p>
-      </div>
+            : "បន្តដំណើរការរៀនភាសាអង់គ្លេសរបស់អ្នក"
+        }
+      >
+        <Button onClick={() => navigate("/learn/grammar")}>
+          <BookOpen size={18} />
+          {language === "en" ? "Start Learning" : "ចាប់ផ្តើមរៀន"}
+        </Button>
+      </PageHeader>
 
-      <div className="mb-8 grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-4">
-        <div className="rounded-xl border border-[--border] bg-[--card] p-6 text-center shadow-[--shadow]">
-          <div className="mb-1 text-3xl font-bold text-[--primary]">
-            {completedCount}
+      <div className="rounded-2xl border bg-gradient-to-br from-primary/10 via-card to-card p-6 shadow-card sm:p-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-foreground">
+              {language === "en"
+                ? "Keep your streak alive"
+                : "បន្តការរៀនប្រចាំថ្ងៃរបស់អ្នក"}
+            </h2>
+            <p className="mt-1 max-w-xl text-sm text-muted-foreground">
+              {language === "en"
+                ? "Practice a little every day — grammar, stories, and vocabulary are all one click away."
+                : "អនុវត្តបន្តិចរាល់ថ្ងៃ — វេយ្យាករណ៍ រឿង និងវាក្យសព្ទ អាចចូលបានពីទីនេះតែមួយកន្លែង។"}
+            </p>
           </div>
-          <div className="text-sm dark:text-white">
-            {language === "en" ? "Lessons Done" : "មេរៀនបានរៀន"}
-          </div>
-        </div>
-        <div className="rounded-xl border border-[--border] bg-[--card] p-6 text-center shadow-[--shadow]">
-          <div className="mb-1 text-3xl font-bold text-[--primary]">
-            {totalLessons}
-          </div>
-          <div className="text-sm dark:text-white">
-            {language === "en" ? "Total Lessons" : "មេរៀនសរុប"}
-          </div>
-        </div>
-        <div className="rounded-xl border border-[--border] bg-[--card] p-6 text-center shadow-[--shadow]">
-          <div className="mb-1 text-3xl font-bold text-[--primary]">
-            {totalScore}
-          </div>
-          <div className="text-sm dark:text-white">
-            {language === "en" ? "Quiz Score" : "ពិន្ទុសំណួរ"}
-          </div>
-        </div>
-        <div className="rounded-xl border border-[--border] bg-[--card] p-6 text-center shadow-[--shadow]">
-          <div className="mb-1 text-3xl font-bold text-[--primary]">
-            {progress?.streakCount ?? 0}
-          </div>
-          <div className="text-sm dark:text-white">
-            {language === "en" ? "Day Streak" : "ថ្ងៃជាប់គ្នា"}
+          <div className="flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
+            <Flame size={18} />
+            {progress?.streakCount ?? 0}{" "}
+            {language === "en" ? "day streak" : "ថ្ងៃជាប់គ្នា"}
           </div>
         </div>
       </div>
 
-      <section className="mb-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
-        <h2 className="mb-4 text-xl font-bold text-zinc-900 dark:text-zinc-100">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          icon={<CheckCircle2 size={22} />}
+          label={language === "en" ? "Lessons Done" : "មេរៀនបានរៀន"}
+          value={completedCount}
+        />
+        <StatCard
+          icon={<BookOpen size={22} />}
+          label={language === "en" ? "Total Lessons" : "មេរៀនសរុប"}
+          value={totalLessons}
+        />
+        <StatCard
+          icon={<BarChart3 size={22} />}
+          label={language === "en" ? "Quiz Score" : "ពិន្ទុសំណួរ"}
+          value={totalScore}
+        />
+        <StatCard
+          icon={<Flame size={22} />}
+          label={language === "en" ? "Day Streak" : "ថ្ងៃជាប់គ្នា"}
+          value={progress?.streakCount ?? 0}
+        />
+      </div>
+
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold text-foreground">
           {language === "en" ? "Quick Actions" : "សកម្មភាពរហ័ស"}
         </h2>
-
         <div className="flex flex-wrap gap-3">
-          {/* Primary CTA (Solid Black in Light Mode, Solid White in Dark Mode) */}
-          <button
-            className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-zinc-900 bg-zinc-900 px-5 py-2.5 text-[0.9375rem] font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-zinc-800 active:translate-y-0 active:scale-95 dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200"
-            onClick={() => navigate("/learn/grammar")}
-          >
+          <Button onClick={() => navigate("/learn/grammar")}>
             <BookOpen size={18} />
-            <span>{language === "en" ? "Start Learning" : "ចាប់ផ្តើមរៀន"}</span>
-          </button>
-
-          {/* Secondary Buttons (Light BG, Crisp Border, Hover Inversion) */}
-          <button
-            className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-zinc-300 bg-zinc-50/80 px-5 py-2.5 text-[0.9375rem] font-medium text-zinc-800 transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-900 hover:bg-zinc-100 hover:text-zinc-900 active:translate-y-0 active:scale-95 dark:border-zinc-700 dark:bg-zinc-900/60 dark:text-zinc-200 dark:hover:border-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
-            onClick={() => navigate("/learn/stories")}
-          >
+            {language === "en" ? "Start Learning" : "ចាប់ផ្តើមរៀន"}
+          </Button>
+          <Button variant="outline" onClick={() => navigate("/learn/stories")}>
             <BookMarked size={18} />
-            <span>{language === "en" ? "Read Stories" : "អានរឿង"}</span>
-          </button>
-
-          <button
-            className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-zinc-300 bg-zinc-50/80 px-5 py-2.5 text-[0.9375rem] font-medium text-zinc-800 transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-900 hover:bg-zinc-100 hover:text-zinc-900 active:translate-y-0 active:scale-95 dark:border-zinc-700 dark:bg-zinc-900/60 dark:text-zinc-200 dark:hover:border-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
-            onClick={() => navigate("/learn/bookmarks")}
-          >
+            {language === "en" ? "Read Stories" : "អានរឿង"}
+          </Button>
+          <Button variant="outline" onClick={() => navigate("/learn/bookmarks")}>
             <Bookmark size={18} />
-            <span>{language === "en" ? "Bookmarks" : "ចំណាំ"}</span>
-          </button>
-
-          <button
-            className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-zinc-300 bg-zinc-50/80 px-5 py-2.5 text-[0.9375rem] font-medium text-zinc-800 transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-900 hover:bg-zinc-100 hover:text-zinc-900 active:translate-y-0 active:scale-95 dark:border-zinc-700 dark:bg-zinc-900/60 dark:text-zinc-200 dark:hover:border-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
-            onClick={() => navigate("/learn/review")}
-          >
+            {language === "en" ? "Bookmarks" : "ចំណាំ"}
+          </Button>
+          <Button variant="outline" onClick={() => navigate("/learn/review")}>
             <RefreshCw size={18} />
-            <span>{language === "en" ? "Review" : "ពិនិត្យឡើងវិញ"}</span>
-          </button>
-
-          <button
-            className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-zinc-300 bg-zinc-50/80 px-5 py-2.5 text-[0.9375rem] font-medium text-zinc-800 transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-900 hover:bg-zinc-100 hover:text-zinc-900 active:translate-y-0 active:scale-95 dark:border-zinc-700 dark:bg-zinc-900/60 dark:text-zinc-200 dark:hover:border-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
-            onClick={() => navigate("/learn/progress")}
-          >
+            {language === "en" ? "Review" : "ពិនិត្យឡើងវិញ"}
+          </Button>
+          <Button variant="outline" onClick={() => navigate("/learn/progress")}>
             <BarChart3 size={18} />
-            <span>
-              {language === "en" ? "My Progress" : "វឌ្ឍនភាពរបស់ខ្ញុំ"}
-            </span>
-          </button>
+            {language === "en" ? "My Progress" : "វឌ្ឍនភាពរបស់ខ្ញុំ"}
+          </Button>
         </div>
       </section>
 
-      <section className="mb-8">
-        <h2
-          className="mb-4 text-xl font-semibold"
-          style={{ color: "var(--foreground)" }}
-        >
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold text-foreground">
           {language === "en" ? "Learning Units" : "មេរៀន"}
         </h2>
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.isArray(units) &&
             units.map((unit: any) => {
               const lessons =
                 unit.chapters?.flatMap((c: any) => c.lessons ?? []) ?? [];
               return (
-                <div
+                <Card
                   key={unit.id}
-                  className="cursor-pointer rounded-xl border border-[--border] bg-[--card] p-6 shadow-[--shadow] transition-all hover:-translate-y-0.5 hover:shadow-[--shadow-md]"
                   onClick={() => navigate("/learn/grammar")}
+                  className="cursor-pointer p-6 transition-all hover:-translate-y-0.5 hover:shadow-card-md"
                 >
                   <div className="mb-4 flex items-start justify-between gap-4">
-                    <BookOpen size={24} style={{ color: "var(--primary)" }} />
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                      <GraduationCap size={22} />
+                    </div>
                   </div>
-                  <h3
-                    className="mb-1 text-lg font-semibold"
-                    style={{ color: "var(--foreground)" }}
-                  >
+                  <h3 className="mb-1 text-lg font-semibold text-foreground">
                     {t(unit.title as any)}
                   </h3>
-                  <p className="text-sm text-muted">
-                    {lessons.length} {language === "en" ? "lessons" : "មេរៀន"}
+                  <p className="text-sm text-muted-foreground">
+                    {lessons.length}{" "}
+                    {language === "en" ? "lessons" : "មេរៀន"}
                   </p>
-                </div>
+                </Card>
               );
             })}
         </div>

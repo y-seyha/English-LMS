@@ -3,8 +3,10 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useClerk, useAuth, SignIn, SignUp } from "@clerk/clerk-react";
 import Layout from "./components/layout/Layout";
 import { setClerkInstance } from "./api/client";
+import { useIsAdmin } from "./hooks/useIsAdmin";
 import { Toaster } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, GraduationCap, Sparkles } from "lucide-react";
+import { Button } from "./components/ui/button";
 
 import Home from "./pages/student/Home";
 import Grammar from "./pages/student/Grammar";
@@ -46,19 +48,41 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { isLoaded, userId } = useAuth();
+  const { isAdmin, isLoading: roleLoading } = useIsAdmin();
+  if (!isLoaded || roleLoading) return <Loader />;
+  if (!userId) return <Navigate to="/" replace />;
+  if (!isAdmin) return <Navigate to="/learn" replace />;
+  return <>{children}</>;
+}
+
 function Landing() {
   return (
-    <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
-      <h1 className="mb-4 text-4xl font-bold text-foreground">EnglishEase</h1>
-      <p className="mb-8 text-lg text-muted-foreground">
+    <div className="flex min-h-[65vh] flex-col items-center justify-center py-16 text-center">
+      <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+        <GraduationCap size={32} />
+      </div>
+      <h1 className="mb-3 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+        EnglishEase
+      </h1>
+      <p className="mb-8 max-w-md text-lg text-muted-foreground">
         Learn English step by step with Khmer translation
       </p>
-      <a
-        href="/sign-in"
-        className="inline-flex cursor-pointer items-center justify-center rounded-xl border border-primary/40 bg-black dark:bg-white px-6 py-3 dark:text-black  text-white font-semibold text-primary-foreground shadow-md shadow-primary/20 transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary/90 hover:shadow-lg dark:border-primary/60 active:translate-y-0 active:scale-[0.98]"
-      >
-        Sign In to Start Learning
-      </a>
+      <div className="flex flex-wrap items-center justify-center gap-3">
+        <Button size="lg" className="text-base" onClick={() => (window.location.href = "/sign-in")}>
+          <Sparkles size={18} />
+          Sign In to Start Learning
+        </Button>
+        <Button
+          size="lg"
+          variant="outline"
+          className="text-base"
+          onClick={() => (window.location.href = "/sign-up")}
+        >
+          Create Account
+        </Button>
+      </div>
     </div>
   );
 }
@@ -168,56 +192,56 @@ export default function App() {
           <Route
             path="/admin"
             element={
-              <ProtectedRoute>
+              <AdminRoute>
                 <AdminDashboard />
-              </ProtectedRoute>
+              </AdminRoute>
             }
           />
           <Route
             path="/admin/lessons"
             element={
-              <ProtectedRoute>
+              <AdminRoute>
                 <LessonsManager />
-              </ProtectedRoute>
+              </AdminRoute>
             }
           />
           <Route
             path="/admin/stories"
             element={
-              <ProtectedRoute>
+              <AdminRoute>
                 <StoriesManager />
-              </ProtectedRoute>
+              </AdminRoute>
             }
           />
           <Route
             path="/admin/vocabulary"
             element={
-              <ProtectedRoute>
+              <AdminRoute>
                 <VocabularyManager />
-              </ProtectedRoute>
+              </AdminRoute>
             }
           />
           <Route
             path="/admin/users"
             element={
-              <ProtectedRoute>
+              <AdminRoute>
                 <UsersManager />
-              </ProtectedRoute>
+              </AdminRoute>
             }
           />
           <Route
             path="/admin/review"
             element={
-              <ProtectedRoute>
+              <AdminRoute>
                 <ReviewManager />
-              </ProtectedRoute>
+              </AdminRoute>
             }
           />
           <Route
             path="/sign-in/*"
             element={
               <PublicRoute>
-                <div className="flex min-h-[calc(100vh-10rem)] w-full items-center justify-center p-4">
+                <div className="flex min-h-[75vh] w-full items-center justify-center py-8">
                   <SignIn
                     routing="path"
                     path="/sign-in"
@@ -233,7 +257,7 @@ export default function App() {
             path="/sign-up/*"
             element={
               <PublicRoute>
-                <div className="flex min-h-[calc(100vh-10rem)] w-full items-center justify-center p-4">
+                <div className="flex min-h-[75vh] w-full items-center justify-center py-8">
                   <SignUp
                     routing="path"
                     path="/sign-up"

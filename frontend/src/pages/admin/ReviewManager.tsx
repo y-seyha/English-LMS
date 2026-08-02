@@ -4,7 +4,13 @@ import { useAdminReviewItems } from "../../api/admin";
 import AdminLayout from "../../components/layout/AdminLayout";
 import Pagination from "../../components/ui/Pagination";
 import DetailModal from "../../components/ui/DetailModal";
-import { Loader2, CheckCircle2, XCircle, RefreshCw, Eye } from "lucide-react";
+import EmptyState from "@/components/ui/EmptyState";
+import PageHeader from "@/components/ui/PageHeader";
+import Spinner from "@/components/ui/Spinner";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { CheckCircle2, XCircle, RefreshCw, Eye } from "lucide-react";
 
 export default function ReviewManager() {
   const { language } = useLanguage();
@@ -14,111 +20,89 @@ export default function ReviewManager() {
 
   return (
     <AdminLayout>
-      <div className="mb-6">
-        <h1 className="text-[1.875rem] font-bold text-black dark:text-white">
-          {language === "en" ? "Student Review Items" : "ពិនិត្យចម្លើយសិស្ស"}
-        </h1>
-        <p className="text-sm text-black/60 dark:text-white/60">
-          {language === "en"
+      <PageHeader
+        title={language === "en" ? "Student Review Items" : "ពិនិត្យចម្លើយសិស្ស"}
+        description={
+          language === "en"
             ? "Monitor student wrong answers across all lessons"
-            : "តាមដានចម្លើយខុសរបស់សិស្សគ្រប់មេរៀន"}
-        </p>
-      </div>
+            : "តាមដានចម្លើយខុសរបស់សិស្សគ្រប់មេរៀន"
+        }
+      />
 
       {isLoading ? (
-        <div className="flex min-h-[40vh] items-center justify-center">
-          <Loader2
-            size={32}
-            className="animate-spin text-black/40 dark:text-white/40"
-          />
-        </div>
+        <Spinner />
       ) : data?.data?.length === 0 ? (
-        <div className="py-12 text-center">
-          <RefreshCw
-            size={48}
-            className="mx-auto mb-4 text-black/20 dark:text-white/20"
-          />
-          <p className="text-sm text-black/60 dark:text-white/60">
-            {language === "en" ? "No review items yet" : "មិនទាន់មានទេ"}
-          </p>
-        </div>
+        <EmptyState
+          icon={<RefreshCw size={24} />}
+          title={language === "en" ? "No review items yet" : "មិនទាន់មានទេ"}
+          description={
+            language === "en"
+              ? "Student wrong answers will appear here once lessons are completed"
+              : "ចម្លើយខុសរបស់សិស្សនឹងបង្ហាញនៅទីនេះ នៅពេលដែលសិស្សបំពេញមេរៀនរួច"
+          }
+        />
       ) : (
         <>
-          <div className="overflow-x-auto rounded-xl border border-black/10 dark:border-white/10">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-black/10 bg-black/5 dark:border-white/10 dark:bg-white/5">
-                  <th className="px-4 py-3 text-left font-medium text-black dark:text-white">
-                    User
-                  </th>
-                  <th className="px-4 py-3 text-left font-medium text-black dark:text-white">
-                    Lesson
-                  </th>
-                  <th className="px-4 py-3 text-left font-medium text-black dark:text-white hidden md:table-cell">
-                    Question
-                  </th>
-                  <th className="px-4 py-3 text-left font-medium text-black dark:text-white">
-                    Student Answer
-                  </th>
-                  <th className="px-4 py-3 text-left font-medium text-black dark:text-white">
-                    Correct
-                  </th>
-                  <th className="px-4 py-3 text-center font-medium text-black dark:text-white">
-                    Status
-                  </th>
-                  <th className="px-4 py-3 text-center font-medium text-black dark:text-white">
-                    Count
-                  </th>
-                  <th className="px-2 py-3 text-center font-medium text-black dark:text-white"></th>
-                </tr>
-              </thead>
-              <tbody>
+          <Card>
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/30 hover:bg-muted/30">
+                  <TableHead>User</TableHead>
+                  <TableHead>Lesson</TableHead>
+                  <TableHead className="hidden md:table-cell">Question</TableHead>
+                  <TableHead>Student Answer</TableHead>
+                  <TableHead>Correct</TableHead>
+                  <TableHead className="text-center">Status</TableHead>
+                  <TableHead className="text-center">Count</TableHead>
+                  <TableHead className="text-center"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {data?.data?.map((item: any) => (
-                  <tr
-                    key={item._id}
-                    className="border-b border-black/10 last:border-0 hover:bg-black/5 dark:border-white/10 dark:hover:bg-white/5"
-                  >
-                    <td className="px-4 py-3 text-black dark:text-white">
+                  <TableRow key={item._id}>
+                    <TableCell className="text-foreground">
                       {item.userId?.slice(0, 12)}..
-                    </td>
-                    <td className="px-4 py-3 text-black/60 dark:text-white/60">
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
                       {item.lessonId?.slice(0, 20)}
-                    </td>
-                    <td className="hidden max-w-[200px] truncate px-4 py-3 text-black/60 dark:text-white/60 md:table-cell">
+                    </TableCell>
+                    <TableCell className="hidden max-w-[200px] truncate text-muted-foreground md:table-cell">
                       {item.questionText}
-                    </td>
-                    <td className="px-4 py-3 text-red-500">
+                    </TableCell>
+                    <TableCell className="text-destructive">
                       {item.selectedAnswer}
-                    </td>
-                    <td className="px-4 py-3 text-emerald-500">
+                    </TableCell>
+                    <TableCell className="text-success">
                       {item.correctAnswer}
-                    </td>
-                    <td className="px-4 py-3 text-center">
+                    </TableCell>
+                    <TableCell className="text-center">
                       {item.reviewed ? (
                         <CheckCircle2
                           size={16}
-                          className="inline text-emerald-500"
+                          className="inline text-success"
                         />
                       ) : (
-                        <XCircle size={16} className="inline text-amber-500" />
+                        <XCircle size={16} className="inline text-warning" />
                       )}
-                    </td>
-                    <td className="px-4 py-3 text-center text-black/60 dark:text-white/60">
+                    </TableCell>
+                    <TableCell className="text-center text-muted-foreground">
                       {item.reviewCount}
-                    </td>
-                    <td className="px-2 py-3 text-center">
-                      <button
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
+                        className="text-muted-foreground"
                         onClick={() => setDetailItem(item)}
-                        className="rounded-lg p-1.5 text-black/40 hover:bg-black/5 hover:text-black dark:text-white/40 dark:hover:bg-white/10 dark:hover:text-white"
                       >
                         <Eye size={14} />
-                      </button>
-                    </td>
-                  </tr>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </TableBody>
+            </Table>
+          </Card>
           <Pagination
             page={data?.page ?? 1}
             totalPages={data?.totalPages ?? 1}

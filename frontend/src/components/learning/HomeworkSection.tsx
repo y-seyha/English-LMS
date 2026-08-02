@@ -1,8 +1,13 @@
 import { CheckCircle2, BookOpen, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import type { HomeworkTask } from '../../types';
-import { useBilingualText } from '../../contexts/LanguageContext';
+import { useBilingualText, useLanguage } from '../../contexts/LanguageContext';
 import { useCompleteHomework } from '../../api/progress';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import EmptyState from '@/components/ui/EmptyState';
+import { cn } from '@/lib/utils';
 
 interface HomeworkSectionProps {
   tasks: HomeworkTask[];
@@ -11,6 +16,7 @@ interface HomeworkSectionProps {
 
 export default function HomeworkSection({ tasks, lessonId }: HomeworkSectionProps) {
   const t = useBilingualText();
+  const { language } = useLanguage();
   const completeHomework = useCompleteHomework();
   const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
   const [saved, setSaved] = useState(false);
@@ -42,52 +48,74 @@ export default function HomeworkSection({ tasks, lessonId }: HomeworkSectionProp
   return (
     <div>
       <div className="mb-8">
-        <p className="leading-relaxed text-muted">
-          Complete the following homework tasks to practice what you have learned.
+        <p className="leading-relaxed text-muted-foreground">
+          {language === 'en'
+            ? 'Complete the following homework tasks to practice what you have learned.'
+            : 'បំពេញកិច្ចការផ្ទះខាងក្រោម ដើម្បីអនុវត្តនូវអ្វីដែលអ្នកបានរៀន។'}
         </p>
       </div>
 
       {tasks.map((task) => {
         const isDone = completedTasks.has(task.id);
         return (
-          <div
+          <Card
             key={task.id}
-            className={`mb-4 cursor-pointer rounded-xl border bg-[--card] p-6 shadow-[--shadow] transition-all ${isDone ? 'border-[--success]' : 'border-[--border]'}`}
+            className={cn(
+              'mb-4 cursor-pointer p-5 transition-all hover:shadow-card-md',
+              isDone && 'border-success'
+            )}
             onClick={() => toggleTask(task.id)}
           >
             <div className="flex items-center gap-3">
-              <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-white transition-all ${isDone ? 'bg-[--success]' : 'bg-[--border]'}`}>
+              <span
+                className={cn(
+                  'flex h-6 w-6 shrink-0 items-center justify-center rounded-full transition-all',
+                  isDone ? 'text-success' : 'border-2 border-border text-muted-foreground'
+                )}
+              >
                 {isDone ? <CheckCircle2 size={16} /> : <BookOpen size={14} />}
-              </div>
-              <span className={`flex-1 text-[0.9375rem] ${isDone ? 'text-muted line-through' : 'text-[--foreground]'}`}>
+              </span>
+              <span
+                className={cn(
+                  'flex-1 text-[0.9375rem]',
+                  isDone ? 'text-muted-foreground line-through' : 'text-foreground'
+                )}
+              >
                 {t(task.instruction)}
               </span>
             </div>
-          </div>
+          </Card>
         );
       })}
 
       {tasks.length > 0 && !saved && (
-        <button
+        <Button
           onClick={handleSave}
           disabled={!allDone || completeHomework.isPending}
-          className="mt-4 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-blue-700 disabled:opacity-50 dark:bg-sky-500 dark:hover:bg-sky-600"
+          variant={allDone ? 'success' : 'default'}
+          className="mt-4"
         >
           {completeHomework.isPending ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
-          {allDone ? 'Save Progress' : 'Complete all tasks to save'}
-        </button>
+          {allDone
+            ? language === 'en' ? 'Save Progress' : 'រក្សាទុកវឌ្ឍនភាព'
+            : language === 'en' ? 'Complete all tasks to save' : 'បំពេញកិច្ចការទាំងអស់ដើម្បីរក្សាទុក'}
+        </Button>
       )}
 
       {saved && (
-        <div className="mt-4 flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400">
-          <CheckCircle2 size={16} /> Homework saved
-        </div>
+        <Alert variant="success" className="mt-4">
+          <CheckCircle2 />
+          <AlertDescription>
+            {language === 'en' ? 'Homework saved' : 'បានរក្សាទុកកិច្ចការផ្ទះ'}
+          </AlertDescription>
+        </Alert>
       )}
 
       {tasks.length === 0 && (
-        <div className="px-6 py-12 text-center text-muted">
-          <h3 className="text-lg font-semibold text-[--foreground]">No homework for this lesson</h3>
-        </div>
+        <EmptyState
+          icon={<BookOpen size={24} />}
+          title={language === 'en' ? 'No homework for this lesson' : 'មិនមានកិច្ចការផ្ទះសម្រាប់មេរៀននេះទេ'}
+        />
       )}
     </div>
   );

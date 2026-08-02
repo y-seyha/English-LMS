@@ -16,6 +16,12 @@ import QuizCard from '../../components/learning/QuizCard'
 import type { QuizAnswer } from '../../components/learning/QuizCard'
 import Badge from '../../components/ui/Badge'
 import type { StepType } from '../../components/learning/StepNavigation'
+import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import EmptyState from '@/components/ui/EmptyState'
+import { Skeleton } from '@/components/ui/skeleton'
+import PageHeader from '@/components/ui/PageHeader'
+import { cn } from '@/lib/utils'
 
 export default function GrammarLessonPage() {
   const { lessonId } = useParams<{ lessonId: string }>()
@@ -33,7 +39,7 @@ export default function GrammarLessonPage() {
   const removeBookmark = useRemoveBookmark()
 
   const [currentStep, setCurrentStep] = useState<StepType>('lesson')
-  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 768)
+  const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth >= 1024)
   const [exerciseAttempts, setExerciseAttempts] = useState<Record<string, { selectedAnswer: string; isCorrect: boolean }>>({})
   const [exercisesSubmitted, setExercisesSubmitted] = useState(false)
 
@@ -60,21 +66,41 @@ export default function GrammarLessonPage() {
   }, [lessonId, isBookmarked, currentBookmarkId, bookmarkPending, removeBookmark, addBookmark, language])
 
   if (isLoading) {
-    return <div className="py-12 text-center text-muted">Loading lesson...</div>
+    return (
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-[260px_1fr]">
+        <aside className="hidden space-y-3 lg:block">
+          {[0, 1, 2, 3].map(i => (
+            <Skeleton key={i} className="h-8 rounded-lg" />
+          ))}
+        </aside>
+        <div className="min-w-0 space-y-6 pt-6">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-5 w-24 rounded-full" />
+              <Skeleton className="h-4 w-16" />
+            </div>
+            <Skeleton className="h-9 w-2/3" />
+          </div>
+          <Skeleton className="h-40 w-full rounded-xl" />
+          <Skeleton className="h-24 w-full rounded-xl" />
+          <Skeleton className="h-24 w-full rounded-xl" />
+        </div>
+      </div>
+    )
   }
 
   if (!lesson) {
     return (
-      <div className="animate-[fadeIn_300ms_ease] py-8">
-        <div className="px-6 py-12 text-center text-muted">
-          <BookOpen size={48} className="mx-auto mb-4" style={{ color: 'var(--muted)' }} />
-          <h3 className="mb-2 text-lg font-semibold" style={{ color: 'var(--foreground)' }}>
-            {language === 'en' ? 'Lesson not found' : 'រកមិនឃើញមេរៀនទេ'}
-          </h3>
-          <button className="mt-4 inline-flex items-center gap-2 rounded-lg bg-[--primary] px-5 py-[0.625rem] text-[0.9375rem] font-medium text-white transition-all hover:bg-[--primary-hover]" onClick={() => navigate('/learn/grammar')}>
-            {language === 'en' ? 'Back to Lessons' : 'ត្រឡប់ទៅមេរៀនវិញ'}
-          </button>
-        </div>
+      <div className="animate-fade-in py-8">
+        <EmptyState
+          icon={<BookOpen size={24} />}
+          title={language === 'en' ? 'Lesson not found' : 'រកមិនឃើញមេរៀនទេ'}
+          action={
+            <Button variant="outline" onClick={() => navigate('/learn/grammar')}>
+              {language === 'en' ? 'Back to Lessons' : 'ត្រឡប់ទៅមេរៀនវិញ'}
+            </Button>
+          }
+        />
       </div>
     )
   }
@@ -123,7 +149,7 @@ export default function GrammarLessonPage() {
     : false
 
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-[260px_1fr]">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
       <LessonSidebar
         units={units}
         currentLessonId={lesson.id}
@@ -131,51 +157,55 @@ export default function GrammarLessonPage() {
         onClose={() => setSidebarOpen(false)}
       />
 
-      <div className="min-w-0 pt-6">
-        <div className="mb-4 flex flex-wrap items-center gap-3">
-          <button className="inline-flex items-center gap-2 rounded-lg border border-[--border] bg-transparent px-3 py-[0.375rem] text-xs font-medium transition-all hover:border-[--primary] hover:bg-black/4 hover:text-[--primary] dark:hover:bg-white/6 sm:text-sm" style={{ color: 'var(--foreground)' }} onClick={() => navigate('/learn/grammar')}>
+      <div className="min-w-0 pt-4">
+        <div className="mb-4 flex items-center gap-1">
+          <Button variant="ghost" onClick={() => navigate('/learn/grammar')}>
             <ArrowLeft size={16} /> {language === 'en' ? 'Back' : 'ត្រឡប់'}
-          </button>
-          <button className="inline-flex items-center gap-2 rounded-lg border border-[--border] bg-transparent px-3 py-[0.375rem] text-xs font-medium transition-all hover:border-[--primary] hover:bg-black/4 hover:text-[--primary] dark:hover:bg-white/6 sm:text-sm lg:hidden" style={{ color: 'var(--foreground)' }} onClick={() => setSidebarOpen(true)}>
+          </Button>
+          <Button variant="ghost" className="lg:hidden" onClick={() => setSidebarOpen(true)}>
             <Menu size={16} /> {language === 'en' ? 'Lessons' : 'មេរៀន'}
-          </button>
+          </Button>
         </div>
 
-        <div className="mb-6">
-          <div className="mb-2 flex flex-wrap items-center gap-3">
+        <PageHeader
+          title={t(lesson.title)}
+          description={
+            language === 'en'
+              ? `Lesson ${lesson.estimatedMinutes ?? 0} min · ${lesson.level === 'beginner' ? 'Beginner' : 'Intermediate'} level`
+              : `មេរៀន ${lesson.estimatedMinutes ?? 0} នាទី · កម្រិត${lesson.level === 'beginner' ? 'ដំបូង' : 'មធ្យម'}`
+          }
+        >
+          <div className="flex flex-wrap items-center gap-2">
             <Badge variant={lesson.level}>
               {lesson.level === 'beginner' ? 'Beginner' : 'Intermediate'}
             </Badge>
-            <span className="flex items-center gap-1 text-sm text-muted">
+            <span className="flex items-center gap-1 text-sm text-muted-foreground">
               <Clock size={16} /> {lesson.estimatedMinutes} min
             </span>
             {isCompleted && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-[0.625rem] py-[0.25rem] text-xs font-medium text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400">
+              <Badge variant="success">
                 <CheckCircle2 size={14} />
                 {language === 'en' ? 'Completed' : 'បានបញ្ចប់'}
-              </span>
+              </Badge>
             )}
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={toggleBookmark}
               disabled={bookmarkPending}
-              className="ml-auto inline-flex items-center gap-1 rounded-lg border px-3 py-[0.375rem] text-xs font-medium transition-all sm:text-sm disabled:cursor-not-allowed disabled:opacity-60"
-              style={{
-                color: isBookmarked ? 'var(--primary)' : 'var(--foreground)',
-                borderColor: isBookmarked ? 'var(--primary)' : 'var(--border)',
-              }}
+              className={cn('ml-1', isBookmarked && 'border-primary text-primary hover:text-primary')}
             >
               {bookmarkPending ? (
                 <Loader2 size={14} className="animate-spin" />
               ) : (
-                <Bookmark size={14} fill={isBookmarked ? 'var(--primary)' : 'none'} />
+                <Bookmark size={14} fill={isBookmarked ? 'currentColor' : 'none'} />
               )}
               {isBookmarked
                 ? (language === 'en' ? 'Bookmarked' : 'បានចំណាំ')
                 : (language === 'en' ? 'Bookmark' : 'ចំណាំ')}
-            </button>
+            </Button>
           </div>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--foreground)' }}>{t(lesson.title)}</h1>
-        </div>
+        </PageHeader>
 
         <div className="min-h-[300px]">
           <AnimatePresence mode="wait">
@@ -205,23 +235,25 @@ export default function GrammarLessonPage() {
                 ))}
                 {!exercisesSubmitted && lesson.exercises?.length > 0 && (
                   <div className="mt-6 flex items-center gap-3">
-                    <button
+                    <Button
                       onClick={handleSubmitExercises}
                       disabled={!allExercisesAttempted || submitExercises.isPending}
-                      className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-[0.625rem] text-[0.9375rem] font-medium text-white transition-all hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-sky-500 dark:hover:bg-sky-600"
                     >
                       {submitExercises.isPending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
                       {language === 'en' ? 'Submit Exercises' : 'បញ្ជូនលំហាត់'}
-                    </button>
+                    </Button>
                     {!allExercisesAttempted && (
-                      <span className="text-xs text-muted">{language === 'en' ? 'Answer all exercises to submit' : 'ឆ្លើយលំហាត់ទាំងអស់ដើម្បីបញ្ជូន'}</span>
+                      <span className="text-xs text-muted-foreground">{language === 'en' ? 'Answer all exercises to submit' : 'ឆ្លើយលំហាត់ទាំងអស់ដើម្បីបញ្ជូន'}</span>
                     )}
                   </div>
                 )}
                 {exercisesSubmitted && (
-                  <div className="mt-4 flex items-center gap-2 text-sm text-emerald-600 dark:text-emerald-400">
-                    <CheckCircle2 size={16} /> {language === 'en' ? 'Exercises submitted' : 'បានបញ្ជូនលំហាត់'}
-                  </div>
+                  <Alert variant="success" className="mt-4">
+                    <CheckCircle2 />
+                    <AlertDescription>
+                      {language === 'en' ? 'Exercises submitted' : 'បានបញ្ជូនលំហាត់'}
+                    </AlertDescription>
+                  </Alert>
                 )}
               </motion.div>
             )}

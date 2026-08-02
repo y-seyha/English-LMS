@@ -1,9 +1,14 @@
 import { useState, useCallback, useEffect } from 'react';
-import { RefreshCw, CheckCircle2, XCircle, ArrowRight } from 'lucide-react';
+import { RefreshCw, CheckCircle2, XCircle, ArrowRight, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { QuizQuestion } from '../../types';
 import { useBilingualText } from '../../contexts/LanguageContext';
 import { showSuccess, showWarning } from '../../utils/toast';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { cn } from '@/lib/utils';
 
 export interface QuizAnswer {
   questionId: string;
@@ -102,71 +107,73 @@ export default function QuizCard({ questions, completed, onComplete }: QuizCardP
 
   if (completed) {
     return (
-      <motion.div
-        className="p-8 text-center"
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.3 }}
-      >
+      <Card className="p-8">
         <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+          className="p-8 text-center"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
         >
-          <CheckCircle2 size={64} className="mx-auto mb-4" style={{ color: 'var(--success)' }} />
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+          >
+            <CheckCircle2 className="mx-auto mb-4 size-16 text-success" />
+          </motion.div>
+          <h3 className="mb-2 text-xl font-bold">Quiz Completed</h3>
+          <p className="mb-6 text-muted-foreground">You have already passed this quiz.</p>
         </motion.div>
-        <h3 className="mb-2 text-xl font-bold">Quiz Completed</h3>
-        <p className="mb-6 text-muted">You have already passed this quiz.</p>
-      </motion.div>
+      </Card>
     );
   }
 
   if (allCorrect) {
     return (
-      <motion.div
-        className="p-8 text-center"
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.3 }}
-      >
+      <Card className="p-8">
         <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+          className="p-8 text-center"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
         >
-          <CheckCircle2 size={64} className="mx-auto mb-4" style={{ color: 'var(--success)' }} />
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+          >
+            <CheckCircle2 className="mx-auto mb-4 size-16 text-success" />
+          </motion.div>
+          <h3 className="mb-2 text-xl font-bold">All Correct!</h3>
+          <p className="mb-6 text-muted-foreground">Great job! You have successfully completed the quiz.</p>
+          <ArrowRight size={32} className="mx-auto text-primary" />
         </motion.div>
-        <h3 className="mb-2 text-xl font-bold">All Correct!</h3>
-        <p className="mb-6 text-muted">Great job! You have successfully completed the quiz.</p>
-        <ArrowRight size={32} className="mx-auto" style={{ color: 'var(--primary)' }} />
-      </motion.div>
+      </Card>
     );
   }
 
   return (
     <div className="mb-8">
       <div className="mb-6">
-        <div className="mb-2 h-[6px] w-full rounded-full bg-black/6 dark:bg-white/8">
-          <div
-            className="h-full rounded-full transition-all duration-500"
-            style={{
-              width: `${submitted ? progress : 0}%`,
-              background: submitted ? (wrongIds.size === 0 ? 'var(--success)' : 'var(--warning)') : 'var(--primary)',
-            }}
-          />
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-muted">
+        <div className="mb-3 flex items-center justify-between">
+          <span className="text-sm font-medium">
             {submitted
               ? `${correctCount}/${questions.length} correct`
               : `${Object.keys(answers).length}/${questions.length} answered`}
           </span>
           {submitted && wrongIds.size > 0 && (
-            <span className="text-sm" style={{ color: 'var(--danger)' }}>
+            <span className="text-sm font-medium text-warning">
               {wrongIds.size} remaining
             </span>
           )}
         </div>
+        <Progress
+          value={submitted ? progress : 0}
+          className={cn(
+            submitted && wrongIds.size === 0 && '[&>div]:bg-success',
+            submitted && wrongIds.size > 0 && '[&>div]:bg-warning'
+          )}
+        />
       </div>
 
       {questions.map((q, i) => {
@@ -192,41 +199,58 @@ export default function QuizCard({ questions, completed, onComplete }: QuizCardP
         return (
           <motion.div
             key={q.id}
-            className={`mb-6 rounded-xl border bg-[--card] p-5 transition-all ${isWrong ? 'border-red-500 bg-red-50/50 dark:border-red-400 dark:bg-red-950/20' : ''} ${isCorrect ? 'border-emerald-500 bg-emerald-50/50 dark:border-emerald-400 dark:bg-emerald-950/20' : 'border-[--border]'}`}
+            className="mb-6 rounded-xl border border-border bg-card p-5 shadow-card"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
           >
-            <p className="mb-4 text-base font-semibold leading-relaxed">
-              <span className="mr-2 font-medium text-muted">{i + 1}.</span>
-              {t(q.question)}
+            <p className="mb-4 flex items-start gap-2 text-base font-semibold leading-relaxed">
+              <span className="mt-0.5 inline-flex h-6 min-w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 px-1.5 text-sm font-semibold text-primary">
+                {i + 1}
+              </span>
+              <span>{t(q.question)}</span>
             </p>
             <div className="flex flex-col gap-2">
               {q.options.map((opt, j) => {
                 const val = t(opt);
                 const state = optionStates[val];
-                let cls = 'flex items-center gap-3 rounded-lg border px-4 py-3 text-[0.9375rem] transition-all';
-                if (state === 'correct') cls += ' border-emerald-500 bg-emerald-50 dark:border-emerald-400 dark:bg-emerald-900/30';
-                else if (state === 'wrong') cls += ' border-red-500 bg-red-50 dark:border-red-400 dark:bg-red-900/30';
-                else if (state === 'recheck') cls += ' border-amber-400 bg-amber-50 dark:border-amber-400 dark:bg-amber-900/30';
-                else if (state === 'selected') cls += ' border-blue-500 bg-blue-50 dark:border-sky-400 dark:bg-sky-900/30';
-                else if (showResult && !isWrong) cls += ' cursor-default border-gray-200 opacity-80 dark:border-gray-600';
-                else cls += ' cursor-pointer border-gray-200 hover:border-blue-500 hover:bg-blue-50/50 dark:border-gray-600 dark:hover:border-sky-400 dark:hover:bg-sky-900/20';
+                let cls = 'flex w-full items-center gap-3 rounded-lg border px-4 py-3 text-left text-[0.9375rem] transition-all';
+                if (state === 'correct') cls += ' border-success bg-success/10 text-success';
+                else if (state === 'wrong') cls += ' border-destructive bg-destructive/10 text-destructive';
+                else if (state === 'recheck') cls += ' border-warning bg-warning/10 text-warning';
+                else if (state === 'selected') cls += ' border-primary bg-primary/5 text-foreground';
+                else if (showResult && !isWrong) cls += ' cursor-default border-border text-muted-foreground opacity-60';
+                else cls += ' cursor-pointer border-border text-foreground hover:border-primary hover:bg-primary/5';
 
                 return (
-                  <label key={j} className={cls} onClick={() => {
-                    if (!showResult || isWrong) handleSelect(q.id, val);
-                  }}>
-                    <span className="flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border-2 transition-all" style={{
-                      borderColor: state === 'correct' ? 'var(--success)' : state === 'wrong' ? 'var(--danger)' : state === 'recheck' ? 'var(--warning)' : state === 'selected' ? 'var(--primary)' : 'var(--border)',
-                    }}>
-                      {state === 'selected' && <span className="h-2 w-2 rounded-full bg-blue-600 dark:bg-sky-400" />}
-                      {state === 'recheck' && <span className="h-2 w-2 rounded-full bg-amber-500 dark:bg-amber-400" />}
-                      {state === 'correct' && <span className="text-xs text-emerald-600 dark:text-emerald-400">✓</span>}
-                      {state === 'wrong' && <span className="text-xs text-red-500 dark:text-red-400">✗</span>}
+                  <button
+                    key={j}
+                    type="button"
+                    className={cls}
+                    onClick={() => {
+                      if (!showResult || isWrong) handleSelect(q.id, val);
+                    }}
+                  >
+                    <span
+                      className={cn(
+                        'flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border-2 transition-all',
+                        state === 'correct'
+                          ? 'border-success'
+                          : state === 'wrong'
+                            ? 'border-destructive'
+                            : state === 'recheck'
+                              ? 'border-warning'
+                              : state === 'selected'
+                                ? 'border-primary'
+                                : 'border-border'
+                      )}
+                    >
+                      {state === 'selected' && <span className="h-2 w-2 rounded-full bg-primary" />}
+                      {state === 'recheck' && <XCircle size={12} className="text-warning" />}
+                      {state === 'correct' && <Check size={12} className="text-success" />}
                     </span>
                     <span>{val}</span>
-                  </label>
+                  </button>
                 );
               })}
             </div>
@@ -234,25 +258,29 @@ export default function QuizCard({ questions, completed, onComplete }: QuizCardP
               {showResult && isCorrect && (
                 <motion.div
                   key="correct"
-                  className="mt-3 animate-[slideUp_200ms_ease] rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-400"
+                  className="mt-3 overflow-hidden"
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
                 >
-                  <CheckCircle2 size={14} className="mr-1 inline" />
-                  {t(q.explanation)}
+                  <Alert variant="success">
+                    <CheckCircle2 />
+                    <AlertDescription>{t(q.explanation)}</AlertDescription>
+                  </Alert>
                 </motion.div>
               )}
               {showResult && isWrong && (
                 <motion.div
                   key="wrong"
-                  className="mt-3 animate-[slideUp_200ms_ease] rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-800 dark:bg-red-950/20 dark:text-red-400"
+                  className="mt-3 overflow-hidden"
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
                 >
-                  <XCircle size={14} className="mr-1 inline" />
-                  {t(q.explanation)}
+                  <Alert variant="destructive">
+                    <XCircle />
+                    <AlertDescription>{t(q.explanation)}</AlertDescription>
+                  </Alert>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -268,15 +296,14 @@ export default function QuizCard({ questions, completed, onComplete }: QuizCardP
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
           >
-            <button
-              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-[0.625rem] text-[0.9375rem] font-medium text-white transition-all hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 disabled:saturate-50 dark:bg-sky-500 dark:hover:bg-sky-600"
+            <Button
               disabled={!allAnswered}
               onClick={handleSubmit}
             >
               Submit Answers
-            </button>
+            </Button>
             {!allAnswered && (
-              <p className="mt-2 text-xs text-muted">Answer all questions to submit</p>
+              <p className="mt-2 text-xs text-muted-foreground">Answer all questions to submit</p>
             )}
           </motion.div>
         )}
@@ -289,16 +316,16 @@ export default function QuizCard({ questions, completed, onComplete }: QuizCardP
             exit={{ opacity: 0, y: -10 }}
             className="flex flex-col items-start gap-3"
           >
-            <p className="text-muted">
+            <p className="text-sm text-muted-foreground">
               {wrongIds.size} question{wrongIds.size > 1 ? 's' : ''} incorrect. Fix the answers above and retry.
             </p>
             <div className="flex flex-wrap gap-2">
-              <button className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-[0.625rem] text-[0.9375rem] font-medium text-white transition-all hover:bg-blue-700 dark:bg-sky-500 dark:hover:bg-sky-600" onClick={handleRetryWrong}>
+              <Button onClick={handleRetryWrong}>
                 <RefreshCw size={16} /> Check Answers Again
-              </button>
-              <button className="inline-flex items-center gap-2 rounded-lg border border-[--border] px-5 py-[0.625rem] text-[0.9375rem] font-medium transition-all hover:bg-black/4 dark:hover:bg-white/6" style={{ color: 'var(--foreground)' }} onClick={handleRestart}>
+              </Button>
+              <Button variant="outline" onClick={handleRestart}>
                 <RefreshCw size={16} /> Restart All
-              </button>
+              </Button>
             </div>
           </motion.div>
         )}

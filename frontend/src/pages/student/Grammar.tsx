@@ -6,7 +6,21 @@ import { useGrammarUnits } from "../../api/grammar";
 import { useQuery } from "@tanstack/react-query";
 import apiClient from "../../api/client";
 import { CheckCircle2, Clock, Lock, GraduationCap, Check } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import PageHeader from "@/components/ui/PageHeader";
 import SearchInput from "../../components/ui/SearchInput";
+import Badge from "../../components/ui/Badge";
+
+const levelLabels: Record<
+  "" | "beginner" | "intermediate",
+  { en: string; km: string }
+> = {
+  "": { en: "All", km: "ទាំងអស់" },
+  beginner: { en: "Beginner", km: "កម្រិតដំបូង" },
+  intermediate: { en: "Intermediate", km: "កម្រិតមធ្យម" },
+};
 
 export default function Grammar() {
   const t = useBilingualText();
@@ -36,8 +50,19 @@ export default function Grammar() {
 
   if (isLoading) {
     return (
-      <div className="py-12 text-center text-muted dark:text-white transition-opacity duration-300 animate-pulse">
-        Loading lessons...
+      <div className="space-y-8">
+        <div className="space-y-4">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="space-y-3">
+              <Skeleton className="h-6 w-56" />
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {[0, 1, 2].map((j) => (
+                  <Skeleton key={j} className="h-36 rounded-xl" />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -61,31 +86,31 @@ export default function Grammar() {
   });
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 py-8">
-      <div className="mb-6 transition-all duration-300">
-        <h1
-          className="mb-2 text-[1.875rem] font-bold dark:text-white transition-colors duration-200"
-          style={{ color: "var(--foreground)" }}
-        >
-          {language === "en" ? "Grammar Lessons" : "មេរៀនវេយ្យាករណ៍"}
-        </h1>
-        <p className="text-[1.0625rem] dark:text-white transition-colors duration-200">
-          {language === "en"
+    <div className="space-y-8">
+      <PageHeader
+        title={
+          language === "en" ? "Grammar Lessons" : "មេរៀនវេយ្យាករណ៍"
+        }
+        description={
+          language === "en"
             ? "Learn English grammar step by step"
-            : "រៀនវេយ្យាករណ៍ភាសាអង់គ្លេសជាជំហានៗ"}
-        </p>
-        {!isSignedIn && (
-          <div className="mt-3 flex items-center gap-2 rounded-lg bg-amber-50 px-4 py-2.5 text-sm text-amber-800 dark:bg-amber-950/30 dark:text-amber-300 transition-all duration-300 animate-in fade-in slide-in-from-top-1">
-            <Lock size={14} className="animate-bounce" />
+            : "រៀនវេយ្យាករណ៍ភាសាអង់គ្លេសជាជំហានៗ"
+        }
+      />
+
+      {!isSignedIn && (
+        <Alert variant="warning">
+          <Lock size={16} className="animate-pulse" />
+          <AlertDescription>
             {language === "en"
               ? "Sign in to track progress and save your learning"
               : "ចូលប្រើដើម្បីតាមដានវឌ្ឍនភាព និងរក្សាទុកការរៀនរបស់អ្នក"}
-          </div>
-        )}
-      </div>
+          </AlertDescription>
+        </Alert>
+      )}
 
-      <div className="mb-6 flex flex-wrap items-center gap-3">
-        <div className="w-full max-w-xs transition-transform duration-200 focus-within:scale-[1.01]">
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="w-full max-w-xs">
           <SearchInput
             value={search}
             onChange={setSearch}
@@ -95,40 +120,26 @@ export default function Grammar() {
           />
         </div>
 
-        {/* Filter Buttons with Scale & Color Transitions */}
         <div className="flex flex-wrap gap-2">
           {(["", "beginner", "intermediate"] as const).map((level) => {
             const isSelected =
               levelFilter === level || (!levelFilter && level === "");
-
-            const labels: Record<
-              "" | "beginner" | "intermediate",
-              { en: string; km: string }
-            > = {
-              "": { en: "All", km: "ទាំងអស់" },
-              beginner: { en: "Beginner", km: "កម្រិតដំបូង" },
-              intermediate: { en: "Intermediate", km: "កម្រិតមធ្យម" },
-            };
-
             return (
               <button
                 key={level}
                 type="button"
                 onClick={() => setLevelFilter(level)}
-                className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-bold transition-all duration-300 ease-out active:scale-95 ${
+                className={`inline-flex cursor-pointer items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold transition-all active:scale-95 ${
                   isSelected
-                    ? "bg-blue-600 text-white shadow-md shadow-blue-500/30 ring-2 ring-blue-600 ring-offset-2 dark:ring-offset-zinc-900 scale-105"
-                    : "border border-[--border] bg-[--bg-secondary] text-[--foreground] dark:text-white hover:bg-[--card] hover:border-blue-400/50"
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "border border-border bg-card text-foreground hover:bg-accent"
                 }`}
               >
                 {isSelected && (
-                  <Check
-                    size={14}
-                    className="stroke-[3] animate-in zoom-in-50 duration-200"
-                  />
+                  <Check size={14} className="stroke-[3] animate-scale-in" />
                 )}
                 <span>
-                  {language === "en" ? labels[level].en : labels[level].km}
+                  {language === "en" ? levelLabels[level].en : levelLabels[level].km}
                 </span>
               </button>
             );
@@ -137,70 +148,54 @@ export default function Grammar() {
       </div>
 
       {filteredUnits?.map((unit: any) => (
-        <section key={unit.id} className="mb-8 transition-opacity duration-300">
-          <h2
-            className="mb-4 flex items-center gap-2 text-xl font-semibold dark:text-white"
-            style={{ color: "var(--foreground)" }}
-          >
-            <GraduationCap
-              size={20}
-              className="transition-transform duration-300 hover:rotate-12"
-              style={{ color: "var(--primary)" }}
-            />
+        <section key={unit.id} className="space-y-4">
+          <h2 className="flex items-center gap-2 text-lg font-semibold text-foreground">
+            <GraduationCap size={20} className="text-primary" />
             {t(unit.title)}
           </h2>
           {unit.chapters.map((chapter: any) => (
-            <div key={chapter.id} className="mb-4">
-              <h3 className="mb-2 text-sm font-medium text-muted dark:text-white">
+            <div key={chapter.id} className="space-y-3">
+              <h3 className="text-sm font-medium text-muted-foreground">
                 {t(chapter.title)}
               </h3>
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-3">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {chapter.lessons.map((lesson: any, index: number) => {
                   const completed = completedLessons.includes(lesson.id);
                   const isBeginner = lesson.level === "beginner";
 
                   return (
-                    <div
+                    <Card
                       key={lesson.id}
                       onClick={() => handleLessonClick(lesson.id)}
-                      style={{
-                        animationDelay: `${index * 50}ms`,
-                      }}
-                      className={`cursor-pointer rounded-xl border bg-[--card] p-4 shadow-[--shadow] transition-all duration-300 ease-out hover:-translate-y-1 hover:scale-[1.02] active:scale-[0.98] hover:shadow-lg ${
+                      className={`cursor-pointer p-5 transition-all hover:-translate-y-0.5 hover:shadow-card-md ${
                         completed
-                          ? "border-emerald-300 dark:border-emerald-700 hover:border-emerald-400"
-                          : "border-[--border] hover:border-blue-400/50"
+                          ? "border-success/40"
+                          : "border-border hover:border-primary/50"
                       }`}
                     >
-                      <div className="mb-3 flex items-start justify-between gap-2">
-                        {/* Custom Colored Level Badges */}
-                        <span
-                          className={`inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors duration-200 ${
-                            isBeginner
-                              ? "border-emerald-300 bg-emerald-100 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-200"
-                              : "border-sky-300 bg-sky-100 text-sky-800 dark:border-sky-800 dark:bg-sky-950/60 dark:text-sky-200"
-                          }`}
-                        >
-                          {isBeginner ? "Beginner" : "Intermediate"}
-                        </span>
-
-                        {completed && (
-                          <CheckCircle2
-                            size={18}
-                            className="text-emerald-500 shrink-0 transition-transform duration-300 animate-in zoom-in-50"
-                          />
-                        )}
-                      </div>
-                      <h4
-                        className="mb-1 font-semibold dark:text-white transition-colors duration-200"
-                        style={{ color: "var(--foreground)" }}
+                      <div
+                        className="animate-slide-up"
+                        style={{ animationDelay: `${index * 50}ms` }}
                       >
-                        {t(lesson.title)}
-                      </h4>
-                      <span className="flex items-center gap-1 text-xs text-muted dark:text-white opacity-80 transition-opacity duration-200 group-hover:opacity-100">
-                        <Clock size={12} /> {lesson.estimatedMinutes} min
-                      </span>
-                    </div>
+                        <div className="mb-3 flex items-start justify-between gap-2">
+                          <Badge variant={isBeginner ? "success" : "warning"}>
+                            {isBeginner ? "Beginner" : "Intermediate"}
+                          </Badge>
+                          {completed && (
+                            <CheckCircle2
+                              size={18}
+                              className="shrink-0 text-success animate-scale-in"
+                            />
+                          )}
+                        </div>
+                        <h4 className="mb-1 font-semibold text-foreground">
+                          {t(lesson.title)}
+                        </h4>
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Clock size={12} /> {lesson.estimatedMinutes} min
+                        </span>
+                      </div>
+                    </Card>
                   );
                 })}
               </div>

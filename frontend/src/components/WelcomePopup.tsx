@@ -10,6 +10,7 @@ import {
   X,
 } from "lucide-react";
 import Modal from "./ui/Modal";
+import { Button } from "./ui/button";
 
 const STORAGE_KEY = "welcome-dismissed";
 const AUTO_CLOSE_MS = 7000;
@@ -66,12 +67,12 @@ export default function WelcomePopup() {
         }
       `}</style>
 
-      <div className="group relative overflow-hidden rounded-2xl border border-[--border] bg-[--bg-card] p-6 shadow-2xl transition-colors dark:border-white/10 dark:bg-[--bg-card] dark:shadow-black/50 sm:p-8">
+      <div className="relative overflow-hidden rounded-2xl border bg-card p-6 shadow-card-md sm:p-8">
         {/* Top Right "X" Close Button */}
         <button
           onClick={handleClose}
           aria-label="Close modal"
-          className="absolute right-4 top-4 z-10 cursor-pointer rounded-full p-2 text-[--text-muted] transition-all hover:bg-[--bg-secondary] hover:text-[--foreground] active:scale-95"
+          className="absolute right-4 top-4 z-10 cursor-pointer rounded-full p-2 text-muted-foreground transition-all hover:bg-accent hover:text-foreground active:scale-95"
         >
           <X size={18} />
         </button>
@@ -79,24 +80,24 @@ export default function WelcomePopup() {
         {/* Top Glow Accent Effect */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute -top-20 left-1/2 -z-10 h-44 w-44 -translate-x-1/2 rounded-full bg-gradient-to-tr from-blue-500/20 via-purple-500/20 to-pink-500/20 blur-2xl transition-all duration-700 group-hover:scale-125"
+          className="pointer-events-none absolute -top-20 left-1/2 -z-10 h-44 w-44 -translate-x-1/2 rounded-full bg-gradient-to-tr from-blue-500/20 via-purple-500/20 to-pink-500/20 blur-2xl"
         />
 
         <div className="text-center">
           {/* Badge / Main Icon */}
-          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg shadow-blue-500/25 ring-4 ring-blue-500/10 transition-transform duration-300 group-hover:scale-105">
-            <GraduationCap size={32} className="text-white" />
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-4 ring-primary/10">
+            <GraduationCap size={32} />
           </div>
 
           {/* Title */}
-          <h2 className="mb-2 text-2xl font-bold tracking-tight text-[--foreground]">
+          <h2 className="mb-2 text-2xl font-bold tracking-tight text-foreground">
             {language === "en"
               ? "Welcome to EnglishEase"
               : "សូមស្វាគមន៍មកកាន់ EnglishEase"}
           </h2>
 
           {/* Subtitle */}
-          <p className="mx-auto mb-6 max-w-sm text-sm leading-relaxed text-[--text-muted]">
+          <p className="mx-auto mb-6 max-w-sm text-sm leading-relaxed text-muted-foreground">
             {language === "en"
               ? "Learn English grammar step by step with Khmer translations."
               : "រៀនវេយ្យាករណ៍ភាសាអង់គ្លេសជាជំហានៗជាមួយការបកប្រែជាភាសាខ្មែរ។"}
@@ -111,12 +112,12 @@ export default function WelcomePopup() {
             ].map(({ icon: Icon, labelEn, labelKm }) => (
               <div
                 key={labelEn}
-                className="group/card flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-[--border]/60 bg-[--bg-secondary] p-3 text-center transition-all duration-200 hover:-translate-y-0.5 hover:border-[--primary]/40 hover:shadow-sm"
+                className="flex flex-col items-center gap-2 rounded-xl border bg-card p-3 text-center transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card-md"
               >
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[--primary]/10 text-[--primary] transition-transform duration-200 group-hover/card:scale-110">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary transition-transform duration-200 hover:scale-110">
                   <Icon size={18} />
                 </div>
-                <span className="text-xs font-semibold text-[--foreground]">
+                <span className="text-xs font-semibold text-foreground">
                   {language === "en" ? labelEn : labelKm}
                 </span>
               </div>
@@ -126,28 +127,28 @@ export default function WelcomePopup() {
           {/* Action Buttons */}
           <div className="flex flex-col gap-2.5">
             {!isSignedIn && (
-              <a
-                href="/sign-in"
-                className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[--primary] px-5 py-3 text-sm font-semibold text-white shadow-md shadow-[--primary]/20 transition-all duration-200 hover:bg-[--primary-hover] hover:shadow-lg active:scale-[0.98]"
-              >
-                <Sparkles size={16} />
-                {language === "en"
-                  ? "Sign In to Start"
-                  : "ចូលប្រើដើម្បីចាប់ផ្តើម"}
-              </a>
+              <Button asChild className="h-auto w-full px-5 py-3">
+                <a href="/sign-in">
+                  <Sparkles size={16} />
+                  {language === "en"
+                    ? "Sign In to Start"
+                    : "ចូលប្រើដើម្បីចាប់ផ្តើម"}
+                </a>
+              </Button>
             )}
 
-            <button
+            <Button
+              variant="outline"
               onClick={handleClose}
-              className="w-full cursor-pointer rounded-xl border border-[--border] bg-transparent px-5 py-3 text-sm font-semibold text-[--foreground] transition-all duration-200 hover:bg-[--bg-secondary] active:scale-[0.98]"
+              className="h-auto w-full px-5 py-3"
             >
               {language === "en" ? "Get Started" : "ចាប់ផ្តើម"}
-            </button>
+            </Button>
           </div>
         </div>
 
         {/* Uninterrupted Countdown Timer Bar */}
-        <div className="absolute bottom-0 left-0 right-0 h-1 w-full bg-[--bg-secondary]">
+        <div className="absolute bottom-0 left-0 right-0 h-1 w-full bg-muted/25">
           <div
             className="h-full bg-gradient-to-r from-blue-500 to-purple-600"
             style={{

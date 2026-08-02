@@ -3,6 +3,11 @@ import Modal from '../../components/ui/Modal'
 import { useCreateLesson, useUpdateLesson, useGrammarUnits } from '../../api/grammar'
 import { showSuccess, showError } from '../../utils/toast'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { Button } from '@/components/ui/button'
+import { Input as UIInput } from '@/components/ui/input'
+import { Textarea as UITextarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
+import { Select as SelectRadix, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Plus, Trash2 } from 'lucide-react'
 
 type Tab = 'basic' | 'grammar' | 'mistakes' | 'exercises' | 'homework' | 'quiz'
@@ -156,13 +161,13 @@ export default function LessonFormModal({ open, onClose, initialData }: Props) {
   return (
     <Modal isOpen={open} onClose={onClose} title={isEdit ? (language === 'en' ? 'Edit Lesson' : 'កែមេរៀន') : (language === 'en' ? 'New Lesson' : 'មេរៀនថ្មី')}>
       {/* Tabs */}
-      <div className="mb-4 flex flex-wrap gap-1 border-b border-black/10 pb-2 dark:border-white/10">
+      <div className="mb-4 flex flex-wrap gap-1">
         {tabs.map(t => (
           <button key={t.key} onClick={() => setTab(t.key)}
             className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
               tab === t.key
-                ? 'bg-black text-white dark:bg-white dark:text-black'
-                : 'text-black/60 hover:bg-black/5 dark:text-white/60 dark:hover:bg-white/10'
+                ? 'bg-primary/10 text-primary'
+                : 'text-muted-foreground hover:bg-accent hover:text-foreground'
             }`}
           >
             {language === 'en' ? t.label : t.km}
@@ -213,24 +218,24 @@ export default function LessonFormModal({ open, onClose, initialData }: Props) {
         {tab === 'mistakes' && (
           <div className="space-y-3">
             {form.commonMistakes.map((m, i) => (
-              <div key={i} className="rounded-lg border border-black/10 p-3 dark:border-white/10">
+              <div key={i} className="rounded-lg border bg-card p-3">
                 <div className="mb-2 flex items-center justify-between">
-                  <span className="text-xs font-medium text-black/60 dark:text-white/60">#{i + 1}</span>
-                  <button onClick={() => setForm(f => ({ ...f, commonMistakes: f.commonMistakes.filter((_, j) => j !== i) }))}
-                    className="text-red-400 hover:text-red-600"><Trash2 size={14} /></button>
+                  <span className="text-xs font-medium text-muted-foreground">#{i + 1}</span>
+                  <Button variant="ghost" size="icon-sm" className="text-destructive hover:bg-destructive/10" onClick={() => setForm(f => ({ ...f, commonMistakes: f.commonMistakes.filter((_, j) => j !== i) }))}>
+                    <Trash2 size={14} />
+                  </Button>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
-              <Input label="Mistake" value={m.mistake} onChange={v => setForm(f => ({ ...f, commonMistakes: f.commonMistakes.map((x, j) => j === i ? { ...x, mistake: v } : x) }))} />
-              <Input label="Correction" value={m.correction} onChange={v => setForm(f => ({ ...f, commonMistakes: f.commonMistakes.map((x, j) => j === i ? { ...x, correction: v } : x) }))} />
-              <Input label="Reason (EN)" value={m.reasonEn} onChange={v => setForm(f => ({ ...f, commonMistakes: f.commonMistakes.map((x, j) => j === i ? { ...x, reasonEn: v } : x) }))} />
-              <Input label="Reason (KM)" value={m.reasonKm} onChange={v => setForm(f => ({ ...f, commonMistakes: f.commonMistakes.map((x, j) => j === i ? { ...x, reasonKm: v } : x) }))} />
+                  <Input label="Mistake" value={m.mistake} onChange={v => setForm(f => ({ ...f, commonMistakes: f.commonMistakes.map((x, j) => j === i ? { ...x, mistake: v } : x) }))} />
+                  <Input label="Correction" value={m.correction} onChange={v => setForm(f => ({ ...f, commonMistakes: f.commonMistakes.map((x, j) => j === i ? { ...x, correction: v } : x) }))} />
+                  <Input label="Reason (EN)" value={m.reasonEn} onChange={v => setForm(f => ({ ...f, commonMistakes: f.commonMistakes.map((x, j) => j === i ? { ...x, reasonEn: v } : x) }))} />
+                  <Input label="Reason (KM)" value={m.reasonKm} onChange={v => setForm(f => ({ ...f, commonMistakes: f.commonMistakes.map((x, j) => j === i ? { ...x, reasonKm: v } : x) }))} />
                 </div>
               </div>
             ))}
-            <button onClick={() => setForm(f => ({ ...f, commonMistakes: [...f.commonMistakes, { mistake: '', correction: '', reasonEn: '', reasonKm: '' }] }))}
-              className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700 dark:text-sky-400">
+            <Button variant="link" size="sm" className="h-auto px-0 text-xs" onClick={() => setForm(f => ({ ...f, commonMistakes: [...f.commonMistakes, { mistake: '', correction: '', reasonEn: '', reasonKm: '' }] }))}>
               <Plus size={14} /> {language === 'en' ? 'Add Mistake' : 'បន្ថែមកំហុស'}
-            </button>
+            </Button>
           </div>
         )}
 
@@ -249,15 +254,13 @@ export default function LessonFormModal({ open, onClose, initialData }: Props) {
                     options={[{ value: 'multiple-choice', label: 'Multiple Choice' }, { value: 'true-false', label: 'True/False' }, { value: 'fill-blank', label: 'Fill Blank' }]} />
                   <Input label="Correct Answer" value={item.correctAnswer} onChange={v => onChange({ ...item, correctAnswer: v })} />
                 </div>
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-black/60 dark:text-white/60">Options (EN, comma-separated)</label>
-                  <input type="text" value={item.optionsEn.join(', ')} onChange={e => onChange({ ...item, optionsEn: e.target.value.split(',').map(s => s.trim()) })}
-                    className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-black dark:border-white/10 dark:bg-black dark:text-white" />
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-muted-foreground">Options (EN, comma-separated)</Label>
+                  <UIInput type="text" value={item.optionsEn.join(', ')} onChange={e => onChange({ ...item, optionsEn: e.target.value.split(',').map(s => s.trim()) })} />
                 </div>
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-black/60 dark:text-white/60">Options (KM, comma-separated)</label>
-                  <input type="text" value={item.optionsKm.join(', ')} onChange={e => onChange({ ...item, optionsKm: e.target.value.split(',').map(s => s.trim()) })}
-                    className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-black dark:border-white/10 dark:bg-black dark:text-white" />
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-muted-foreground">Options (KM, comma-separated)</Label>
+                  <UIInput type="text" value={item.optionsKm.join(', ')} onChange={e => onChange({ ...item, optionsKm: e.target.value.split(',').map(s => s.trim()) })} />
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <Input label="Explanation (EN)" value={item.explanationEn} onChange={v => onChange({ ...item, explanationEn: v })} />
@@ -280,10 +283,9 @@ export default function LessonFormModal({ open, onClose, initialData }: Props) {
                   <Input label="Instruction (EN)" value={item.instructionEn} onChange={v => onChange({ ...item, instructionEn: v })} />
                   <Input label="Instruction (KM)" value={item.instructionKm} onChange={v => onChange({ ...item, instructionKm: v })} />
                 </div>
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-black/60 dark:text-white/60">Items (one per line)</label>
-                  <textarea value={item.items.join('\n')} onChange={e => onChange({ ...item, items: e.target.value.split('\n').filter(Boolean) })}
-                    className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-black dark:border-white/10 dark:bg-black dark:text-white" rows={3} />
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-muted-foreground">Items (one per line)</Label>
+                  <UITextarea value={item.items.join('\n')} onChange={e => onChange({ ...item, items: e.target.value.split('\n').filter(Boolean) })} rows={3} />
                 </div>
               </div>
             )}
@@ -307,15 +309,13 @@ export default function LessonFormModal({ open, onClose, initialData }: Props) {
                     options={[{ value: 'multiple-choice', label: 'Multiple Choice' }, { value: 'true-false', label: 'True/False' }, { value: 'fill-blank', label: 'Fill Blank' }]} />
                   <Input label="Correct Answer" value={item.correctAnswer} onChange={v => onChange({ ...item, correctAnswer: v })} />
                 </div>
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-black/60 dark:text-white/60">Options (EN, comma-separated)</label>
-                  <input type="text" value={item.optionsEn.join(', ')} onChange={e => onChange({ ...item, optionsEn: e.target.value.split(',').map(s => s.trim()) })}
-                    className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-black dark:border-white/10 dark:bg-black dark:text-white" />
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-muted-foreground">Options (EN, comma-separated)</Label>
+                  <UIInput type="text" value={item.optionsEn.join(', ')} onChange={e => onChange({ ...item, optionsEn: e.target.value.split(',').map(s => s.trim()) })} />
                 </div>
-                <div>
-                  <label className="mb-1 block text-xs font-medium text-black/60 dark:text-white/60">Options (KM, comma-separated)</label>
-                  <input type="text" value={item.optionsKm.join(', ')} onChange={e => onChange({ ...item, optionsKm: e.target.value.split(',').map(s => s.trim()) })}
-                    className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-black dark:border-white/10 dark:bg-black dark:text-white" />
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-muted-foreground">Options (KM, comma-separated)</Label>
+                  <UIInput type="text" value={item.optionsKm.join(', ')} onChange={e => onChange({ ...item, optionsKm: e.target.value.split(',').map(s => s.trim()) })} />
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <Input label="Explanation (EN)" value={item.explanationEn} onChange={v => onChange({ ...item, explanationEn: v })} />
@@ -329,14 +329,13 @@ export default function LessonFormModal({ open, onClose, initialData }: Props) {
         )}
       </div>
 
-      <div className="mt-4 flex justify-end gap-2 border-t border-black/10 pt-4 dark:border-white/10">
-        <button onClick={onClose} className="rounded-lg border border-black/10 px-4 py-2 text-sm text-black hover:bg-black/5 dark:border-white/10 dark:text-white dark:hover:bg-white/10">
+      <div className="mt-4 flex justify-end gap-2 border-t pt-4">
+        <Button variant="outline" onClick={onClose}>
           {language === 'en' ? 'Cancel' : 'បោះបង់'}
-        </button>
-        <button onClick={handleSave} disabled={busy || !form.titleEn}
-          className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-black/80 disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-white/80">
+        </Button>
+        <Button onClick={handleSave} disabled={busy || !form.titleEn}>
           {busy ? '...' : (isEdit ? (language === 'en' ? 'Update' : 'កែប្រែ') : (language === 'en' ? 'Create' : 'បង្កើត'))}
-        </button>
+        </Button>
       </div>
     </Modal>
   )
@@ -348,8 +347,8 @@ function FormGroupEditor({ label, structure, examples, onStructureChange, onExam
   onExamplesChange: (exs: { en: string; km: string }[]) => void
 }) {
   return (
-    <div className="rounded-lg border border-black/10 p-3 dark:border-white/10">
-      <h4 className="mb-2 text-sm font-semibold text-black dark:text-white">{label}</h4>
+    <div className="rounded-lg border bg-card p-3">
+      <h4 className="mb-2 text-sm font-semibold text-foreground">{label}</h4>
       <div className="mb-2">
         <Input label="Structure" value={structure} onChange={onStructureChange} />
       </div>
@@ -359,10 +358,9 @@ function FormGroupEditor({ label, structure, examples, onStructureChange, onExam
           <Input label={`Example ${i + 1} (KM)`} value={ex.km} onChange={v => onExamplesChange(examples.map((e, j) => j === i ? { ...e, km: v } : e))} />
         </div>
       ))}
-      <button onClick={() => onExamplesChange([...examples, { en: '', km: '' }])}
-        className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700 dark:text-sky-400">
+      <Button variant="link" size="sm" className="mt-1 h-auto px-0 text-xs" onClick={() => onExamplesChange([...examples, { en: '', km: '' }])}>
         <Plus size={14} /> Add Example
-      </button>
+      </Button>
     </div>
   )
 }
@@ -374,51 +372,53 @@ function ItemsEditor<T extends { id: string }>({ items, render, onAdd, onChange 
   return (
     <div className="space-y-3">
       {items.map((item, i) => (
-        <div key={item.id} className="rounded-lg border border-black/10 p-3 dark:border-white/10">
+        <div key={item.id} className="rounded-lg border bg-card p-3">
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-xs font-medium text-black/60 dark:text-white/60">#{i + 1}</span>
-            <button onClick={() => onChange(items.filter((_, j) => j !== i))}
-              className="text-red-400 hover:text-red-600"><Trash2 size={14} /></button>
+            <span className="text-xs font-medium text-muted-foreground">#{i + 1}</span>
+            <Button variant="ghost" size="icon-sm" className="text-destructive hover:bg-destructive/10" onClick={() => onChange(items.filter((_, j) => j !== i))}>
+              <Trash2 size={14} />
+            </Button>
           </div>
           {render(item, i, (updated) => { const c = [...items]; c[i] = updated; onChange(c) })}
         </div>
       ))}
-      <button onClick={() => onChange([...items, onAdd()])}
-        className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700 dark:text-sky-400">
+      <Button variant="link" size="sm" className="h-auto px-0 text-xs" onClick={() => onChange([...items, onAdd()])}>
         <Plus size={14} /> Add
-      </button>
+      </Button>
     </div>
   )
 }
 
 function Input({ label, value, onChange, type = 'text' }: { label: string; value: string; onChange: (v: string) => void; type?: string }) {
   return (
-    <div>
-      <label className="mb-1 block text-xs font-medium text-black/60 dark:text-white/60">{label}</label>
-      <input type={type} value={value} onChange={e => onChange(e.target.value)}
-        className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-black outline-none focus:border-black dark:border-white/10 dark:bg-black dark:text-white dark:focus:border-white" />
+    <div className="space-y-1.5">
+      <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
+      <UIInput type={type} value={value} onChange={e => onChange(e.target.value)} />
     </div>
   )
 }
 
 function Textarea({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
-    <div>
-      <label className="mb-1 block text-xs font-medium text-black/60 dark:text-white/60">{label}</label>
-      <textarea value={value} onChange={e => onChange(e.target.value)} rows={3}
-        className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-black outline-none focus:border-black dark:border-white/10 dark:bg-black dark:text-white dark:focus:border-white" />
+    <div className="space-y-1.5">
+      <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
+      <UITextarea value={value} onChange={e => onChange(e.target.value)} rows={3} />
     </div>
   )
 }
 
 function Select({ label, value, onChange, options }: { label: string; value: string; onChange: (v: string) => void; options: { value: string; label: string }[] }) {
   return (
-    <div>
-      <label className="mb-1 block text-xs font-medium text-black/60 dark:text-white/60">{label}</label>
-      <select value={value} onChange={e => onChange(e.target.value)}
-        className="w-full rounded-lg border border-black/10 bg-white px-3 py-2 text-sm text-black dark:border-white/10 dark:bg-black dark:text-white">
-        {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-      </select>
+    <div className="space-y-1.5">
+      <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
+      <SelectRadix value={value} onValueChange={onChange}>
+        <SelectTrigger>
+          <SelectValue placeholder="Select..." />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+        </SelectContent>
+      </SelectRadix>
     </div>
   )
 }
