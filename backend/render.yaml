@@ -1,0 +1,25 @@
+# Render Blueprint for the EnglishEase LMS backend
+# Deploy via "New +" -> "Blueprint" in the Render dashboard, or:
+#   https://render.com/deploy
+#
+# Required secrets (set in the dashboard after first deploy):
+#   - MONGODB_URI      e.g. mongodb+srv://user:pass@cluster.mongodb.net/englishease
+#   - CLERK_SECRET_KEY from Clerk Dashboard -> API Keys
+#
+# PORT and NODE_ENV are injected automatically by Render.
+
+services:
+  - type: web
+    name: englishease-api
+    runtime: docker
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    plan: starter
+    envVars:
+      - key: FRONTEND_URL
+        value: https://your-frontend-domain.onrender.com
+      - key: MONGODB_URI
+        sync: false
+      - key: CLERK_SECRET_KEY
+        sync: false
