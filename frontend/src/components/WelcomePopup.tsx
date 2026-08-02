@@ -1,0 +1,164 @@
+import { useState, useEffect } from "react";
+import { useAuth } from "@clerk/clerk-react";
+import { useLanguage } from "../contexts/LanguageContext";
+import {
+  GraduationCap,
+  Sparkles,
+  BookOpen,
+  Brain,
+  Trophy,
+  X,
+} from "lucide-react";
+import Modal from "./ui/Modal";
+
+const STORAGE_KEY = "welcome-dismissed";
+const AUTO_CLOSE_MS = 7000;
+
+function shouldShow(): boolean {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) return true;
+    const dismissed = parseInt(stored, 10);
+    if (isNaN(dismissed)) return true;
+    return Date.now() - dismissed > 24 * 60 * 60 * 1000;
+  } catch {
+    return true;
+  }
+}
+
+export default function WelcomePopup() {
+  const [open, setOpen] = useState(false);
+  const { isSignedIn } = useAuth();
+  const { language } = useLanguage();
+
+  // Handle opening the modal
+  useEffect(() => {
+    if (!shouldShow()) return;
+    const openTimer = setTimeout(() => setOpen(true), 600);
+    return () => clearTimeout(openTimer);
+  }, []);
+
+  const handleClose = () => {
+    try {
+      localStorage.setItem(STORAGE_KEY, String(Date.now()));
+    } catch {}
+    setOpen(false);
+  };
+
+  // Continuous auto-close timer (unaffected by hover)
+  useEffect(() => {
+    if (!open) return;
+
+    const autoCloseTimer = setTimeout(() => {
+      handleClose();
+    }, AUTO_CLOSE_MS);
+
+    return () => clearTimeout(autoCloseTimer);
+  }, [open]);
+
+  return (
+    <Modal isOpen={open} onClose={handleClose} title="">
+      {/* CSS Animation Keyframes */}
+      <style>{`
+        @keyframes countdown {
+          from { width: 100%; }
+          to { width: 0%; }
+        }
+      `}</style>
+
+      <div className="group relative overflow-hidden rounded-2xl border border-[--border] bg-[--bg-card] p-6 shadow-2xl transition-colors dark:border-white/10 dark:bg-[--bg-card] dark:shadow-black/50 sm:p-8">
+        {/* Top Right "X" Close Button */}
+        <button
+          onClick={handleClose}
+          aria-label="Close modal"
+          className="absolute right-4 top-4 z-10 cursor-pointer rounded-full p-2 text-[--text-muted] transition-all hover:bg-[--bg-secondary] hover:text-[--foreground] active:scale-95"
+        >
+          <X size={18} />
+        </button>
+
+        {/* Top Glow Accent Effect */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -top-20 left-1/2 -z-10 h-44 w-44 -translate-x-1/2 rounded-full bg-gradient-to-tr from-blue-500/20 via-purple-500/20 to-pink-500/20 blur-2xl transition-all duration-700 group-hover:scale-125"
+        />
+
+        <div className="text-center">
+          {/* Badge / Main Icon */}
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg shadow-blue-500/25 ring-4 ring-blue-500/10 transition-transform duration-300 group-hover:scale-105">
+            <GraduationCap size={32} className="text-white" />
+          </div>
+
+          {/* Title */}
+          <h2 className="mb-2 text-2xl font-bold tracking-tight text-[--foreground]">
+            {language === "en"
+              ? "Welcome to EnglishEase"
+              : "សូមស្វាគមន៍មកកាន់ EnglishEase"}
+          </h2>
+
+          {/* Subtitle */}
+          <p className="mx-auto mb-6 max-w-sm text-sm leading-relaxed text-[--text-muted]">
+            {language === "en"
+              ? "Learn English grammar step by step with Khmer translations."
+              : "រៀនវេយ្យាករណ៍ភាសាអង់គ្លេសជាជំហានៗជាមួយការបកប្រែជាភាសាខ្មែរ។"}
+          </p>
+
+          {/* Feature Highlights Grid */}
+          <div className="mb-6 grid grid-cols-3 gap-3">
+            {[
+              { icon: BookOpen, labelEn: "Lessons", labelKm: "មេរៀន" },
+              { icon: Brain, labelEn: "Quizzes", labelKm: "សំណួរ" },
+              { icon: Trophy, labelEn: "Progress", labelKm: "វឌ្ឍនភាព" },
+            ].map(({ icon: Icon, labelEn, labelKm }) => (
+              <div
+                key={labelEn}
+                className="group/card flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-[--border]/60 bg-[--bg-secondary] p-3 text-center transition-all duration-200 hover:-translate-y-0.5 hover:border-[--primary]/40 hover:shadow-sm"
+              >
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[--primary]/10 text-[--primary] transition-transform duration-200 group-hover/card:scale-110">
+                  <Icon size={18} />
+                </div>
+                <span className="text-xs font-semibold text-[--foreground]">
+                  {language === "en" ? labelEn : labelKm}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col gap-2.5">
+            {!isSignedIn && (
+              <a
+                href="/sign-in"
+                className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[--primary] px-5 py-3 text-sm font-semibold text-white shadow-md shadow-[--primary]/20 transition-all duration-200 hover:bg-[--primary-hover] hover:shadow-lg active:scale-[0.98]"
+              >
+                <Sparkles size={16} />
+                {language === "en"
+                  ? "Sign In to Start"
+                  : "ចូលប្រើដើម្បីចាប់ផ្តើម"}
+              </a>
+            )}
+
+            <button
+              onClick={handleClose}
+              className="w-full cursor-pointer rounded-xl border border-[--border] bg-transparent px-5 py-3 text-sm font-semibold text-[--foreground] transition-all duration-200 hover:bg-[--bg-secondary] active:scale-[0.98]"
+            >
+              {language === "en" ? "Get Started" : "ចាប់ផ្តើម"}
+            </button>
+          </div>
+        </div>
+
+        {/* Uninterrupted Countdown Timer Bar */}
+        <div className="absolute bottom-0 left-0 right-0 h-1 w-full bg-[--bg-secondary]">
+          <div
+            className="h-full bg-gradient-to-r from-blue-500 to-purple-600"
+            style={{
+              animationName: "countdown",
+              animationDuration: `${AUTO_CLOSE_MS}ms`,
+              animationTimingFunction: "linear",
+              animationFillMode: "forwards",
+            }}
+          />
+        </div>
+      </div>
+    </Modal>
+  );
+}

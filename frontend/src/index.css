@@ -1,0 +1,222 @@
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+/* ===== Custom Theme Tokens ===== */
+@theme {
+  --color-background: #f8fafc;
+  --color-foreground: #0f172a;
+  --color-card: #ffffff;
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-secondary: #8b5cf6;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-muted: #64748b;
+  --color-border: #e2e8f0;
+  --color-bg-secondary: #f1f5f9;
+  --color-header: #ffffff;
+
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+
+  --radius-default: 8px;
+  --radius-lg: 12px;
+
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-card-md:
+    0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-card-lg:
+    0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+  --animate-fade-in: fadeIn 300ms ease;
+  --animate-slide-up: slideUp 300ms ease;
+  --animate-scale-in: scaleIn 200ms ease;
+  --animate-shake: shake 400ms ease;
+}
+
+/* ===== Legacy CSS Custom Properties (backward compat with inline styles) ===== */
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --header: #ffffff;
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --primary-foreground: #ffffff;
+  --secondary: #8b5cf6;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --muted: #64748b;
+  --muted-foreground: #64748b;
+  --border: #e2e8f0;
+  --bg-secondary: #f1f5f9;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg:
+    0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  color-scheme: light;
+}
+
+.dark {
+  --color-background: #0b1121;
+  --color-foreground: #ededed;
+  --color-card: #141e33;
+  --color-primary: #60a5fa;
+  --color-primary-hover: #93bbfc;
+  --color-secondary: #a78bfa;
+  --color-success: #4ade80;
+  --color-warning: #fbbf24;
+  --color-danger: #f87171;
+  --color-muted: #8892a8;
+  --color-border: #1e2a45;
+  --color-bg-secondary: #111b30;
+  --color-header: #0d1428;
+
+  --background: #0b1121;
+  --foreground: #ededed;
+  --card: #141e33;
+  --card-foreground: #ededed;
+  --header: #0d1428;
+  --primary: #60a5fa;
+  --primary-hover: #93bbfc;
+  --primary-foreground: #0f172a;
+  --secondary: #a78bfa;
+  --success: #4ade80;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --muted: #8892a8;
+  --muted-foreground: #8892a8;
+  --border: #1e2a45;
+  --bg-secondary: #111b30;
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.5), 0 1px 2px -1px rgb(0 0 0 / 0.5);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+  --shadow-lg:
+    0 10px 15px -3px rgb(0 0 0 / 0.6), 0 4px 6px -4px rgb(0 0 0 / 0.5);
+  color-scheme: dark;
+}
+
+/* ===== Scrollbar styling ===== */
+html {
+  scrollbar-width: thin;
+}
+
+/* ===== Smooth theme transition ===== */
+*,
+*::before,
+*::after {
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease,
+    color 100ms ease;
+}
+
+/* ===== Keyframes ===== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-4px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* ===== Clerk Dark Mode Overrides ===== */
+.dark .cl-socialButtonsBlockButton,
+.dark .cl-socialButtonsBlockButtonText,
+.dark .cl-socialButtonsBlockButton__google {
+  color: var(--foreground) !important;
+  background-color: var(--card) !important;
+  border-color: var(--border) !important;
+}
+
+.dark .cl-socialButtonsBlockButton:hover {
+  background-color: var(--bg-secondary) !important;
+}
+
+.dark .cl-headerTitle,
+.dark .cl-headerSubtitle,
+.dark .cl-formFieldLabel,
+.dark .cl-identityPreviewText,
+.dark .cl-dividerText {
+  color: var(--foreground) !important;
+}
+
+.dark .cl-formFieldInput {
+  background-color: var(--background) !important;
+  color: var(--foreground) !important;
+  border-color: var(--border) !important;
+}
+
+.dark .cl-footerActionText {
+  color: var(--muted-foreground) !important;
+}
